@@ -1,0 +1,93 @@
+WEBVTT
+
+1
+00:00:02.000 --> 00:00:13.754
+<v Priya>Okay, let's get started. This is sprint planning for Smart Budgets. The goal for this sprint is to get the budgeting engine and bank sync working end to end.</v>
+
+2
+00:00:14.554 --> 00:00:21.308
+<v Marcus>Before we plan, can we agree on the launch target? Sales has been telling customers October.</v>
+
+3
+00:00:22.108 --> 00:00:30.400
+<v Priya>Yes. We decided last week with leadership that the public launch is October 15th. That's the date we're planning against.</v>
+
+4
+00:00:31.200 --> 00:00:38.723
+<v Marcus>Good. Then bank sync is the critical path. We still haven't picked between Plaid and building direct integrations.</v>
+
+5
+00:00:39.523 --> 00:00:51.277
+<v Aisha>I did the comparison. Plaid covers about 12,000 institutions and we'd be live in two weeks. Direct integrations would take us a quarter just for the top 20 banks.</v>
+
+6
+00:00:52.077 --> 00:00:55.369
+<v Marcus>What does Plaid cost at our volume?</v>
+
+7
+00:00:56.169 --> 00:01:04.461
+<v Aisha>Roughly 30 cents per connected account per month at our tier. For the first year that's under our infrastructure budget.</v>
+
+8
+00:01:05.261 --> 00:01:12.399
+<v Priya>Then let's go with Plaid for launch. We can revisit direct integrations next year if costs grow.</v>
+
+9
+00:01:13.199 --> 00:01:19.184
+<v Marcus>Agreed. I'll write up the decision doc and share it with finance by Wednesday.</v>
+
+10
+00:01:19.984 --> 00:01:26.738
+<v Aisha>I'll start the Plaid sandbox integration today. I can have transactions syncing in staging by Friday.</v>
+
+11
+00:01:27.538 --> 00:01:39.676
+<v Jordan>On the budgeting engine, I want to flag a risk. Categorizing transactions automatically is harder than we thought. Our rule-based categorizer is about 70 percent accurate on the test set.</v>
+
+12
+00:01:40.476 --> 00:01:43.768
+<v Priya>What accuracy do we need for launch?</v>
+
+13
+00:01:44.568 --> 00:01:54.783
+<v Jordan>Design says users get annoyed below 90 percent. I think we should use an LLM to categorize the long tail of merchants the rules miss.</v>
+
+14
+00:01:55.583 --> 00:02:01.183
+<v Marcus>What's the latency on that? Budgets need to update quickly after a sync.</v>
+
+15
+00:02:01.983 --> 00:02:10.275
+<v Jordan>We'd batch it after sync, so it's not on the request path. Users would see categories within about a minute.</v>
+
+16
+00:02:11.075 --> 00:02:18.213
+<v Priya>Okay. Jordan, can you prototype the LLM categorizer this sprint and measure accuracy on the test set?</v>
+
+17
+00:02:19.013 --> 00:02:23.844
+<v Jordan>Yes, I'll have numbers by the sprint review on the 19th.</v>
+
+18
+00:02:24.644 --> 00:02:32.552
+<v Elena>From the design side, the onboarding mocks are ready for review. I need engineering feedback before we lock them.</v>
+
+19
+00:02:33.352 --> 00:02:41.260
+<v Priya>Let's schedule a design review for the 22nd. Elena, can you send the Figma link to everyone before then?</v>
+
+20
+00:02:42.060 --> 00:02:45.352
+<v Elena>Will do. I'll send it by Thursday.</v>
+
+21
+00:02:46.152 --> 00:02:54.060
+<v Marcus>One open question: do we support shared budgets for couples at launch? A few beta users asked for it.</v>
+
+22
+00:02:54.860 --> 00:03:01.998
+<v Priya>I don't think we can fit it. Let's leave that open and decide at the design review.</v>
+
+23
+00:03:02.798 --> 00:03:13.013
+<v Priya>Great. To recap: launch is October 15th, we're going with Plaid, Jordan prototypes the LLM categorizer, and design review is on the 22nd. Thanks everyone.</v>

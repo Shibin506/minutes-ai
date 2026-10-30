@@ -1,0 +1,89 @@
+WEBVTT
+
+1
+00:00:02.000 --> 00:00:09.523
+<v Elena>Thanks for joining. Today we're reviewing the onboarding flow for Smart Budgets. You all have the Figma link.</v>
+
+2
+00:00:10.323 --> 00:00:17.846
+<v Elena>The current flow is five steps: welcome, connect bank, pick goals, set budget amounts, and turn on notifications.</v>
+
+3
+00:00:18.646 --> 00:00:28.092
+<v Marcus>Five steps feels long. Our data from the beta shows we lose about 40 percent of users at the bank connection step alone.</v>
+
+4
+00:00:28.892 --> 00:00:38.723
+<v Aisha>Part of that is Plaid's own screen. We can't change it, but we can explain why we need the connection before we show it.</v>
+
+5
+00:00:39.523 --> 00:00:48.200
+<v Elena>I could cut goals and budget amounts into one step. We'd suggest amounts automatically from the last 90 days of spending.</v>
+
+6
+00:00:49.000 --> 00:00:54.985
+<v Priya>I like that. Suggested amounts also give people a reason to connect their bank.</v>
+
+7
+00:00:55.785 --> 00:01:07.154
+<v Jordan>That depends on categorization working well. Quick update on that: the LLM categorizer is at 93 percent accuracy on the test set, up from 70 with rules alone.</v>
+
+8
+00:01:07.954 --> 00:01:11.631
+<v Marcus>That's a big jump. What does it cost?</v>
+
+9
+00:01:12.431 --> 00:01:21.877
+<v Jordan>About two dollars per thousand users per month, because we only send merchants the rules can't handle, and we cache results per merchant.</v>
+
+10
+00:01:22.677 --> 00:01:26.739
+<v Priya>That's fine. Let's ship the LLM categorizer for launch.</v>
+
+11
+00:01:27.539 --> 00:01:36.216
+<v Elena>So the decision is a three-step onboarding: welcome, connect bank, then review suggested budgets. Notifications move to after the first week.</v>
+
+12
+00:01:37.016 --> 00:01:38.770
+<v Marcus>Agreed. Three steps.</v>
+
+13
+00:01:39.570 --> 00:01:47.478
+<v Aisha>One concern. If bank sync fails during onboarding, the suggested budgets screen is empty. We need an error state.</v>
+
+14
+00:01:48.278 --> 00:01:56.186
+<v Elena>Good catch. I'll design an empty state that lets people enter amounts manually. I'll have it ready by Friday.</v>
+
+15
+00:01:56.986 --> 00:02:05.663
+<v Marcus>On shared budgets for couples, I talked to five beta users. They want it, but nobody said they'd leave without it.</v>
+
+16
+00:02:06.463 --> 00:02:13.601
+<v Priya>Then shared budgets are out of scope for launch. We'll put them on the roadmap for Q1.</v>
+
+17
+00:02:14.401 --> 00:02:21.539
+<v Jordan>Should we still design the data model so we can add shared budgets later without a migration?</v>
+
+18
+00:02:22.339 --> 00:02:31.016
+<v Aisha>Yes. I'll add an owner list to the budget table instead of a single owner ID. It's a small change now.</v>
+
+19
+00:02:31.816 --> 00:02:36.262
+<v Marcus>What about notifications? Are we doing push, email, or both?</v>
+
+20
+00:02:37.062 --> 00:02:43.047
+<v Elena>I don't know yet. Push needs the mobile team and they're busy until November.</v>
+
+21
+00:02:43.847 --> 00:02:50.216
+<v Priya>Let's leave notifications as an open question and come back to it at the go/no-go.</v>
+
+22
+00:02:51.016 --> 00:02:58.924
+<v Priya>Recap: three-step onboarding, LLM categorizer ships, shared budgets move to Q1, and Elena owns the empty state by Friday.</v>

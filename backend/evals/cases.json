@@ -1,0 +1,22 @@
+[
+  {"question": "Why did we pick Plaid over direct bank integrations?", "meeting": "sprint-planning", "evidence": "12,000 institutions"},
+  {"question": "How much does Plaid cost per account?", "meeting": "sprint-planning", "evidence": "30 cents per connected account"},
+  {"question": "Who is writing the Plaid decision doc for finance?", "meeting": "sprint-planning", "evidence": "decision doc"},
+  {"question": "What was the accuracy of the rule-based categorizer?", "meeting": "sprint-planning", "evidence": "70 percent accurate"},
+  {"question": "When was the design review scheduled?", "meeting": "sprint-planning", "evidence": "design review for the 22nd"},
+  {"question": "Why did we cut onboarding from five steps to three?", "meeting": "design-review", "evidence": "lose about 40 percent"},
+  {"question": "What accuracy did the LLM categorizer reach in testing?", "meeting": "design-review", "evidence": "93 percent"},
+  {"question": "How much does LLM categorization cost per user?", "meeting": "design-review", "evidence": "two dollars per thousand users"},
+  {"question": "What happens if bank sync fails during onboarding?", "meeting": "design-review", "evidence": "empty state"},
+  {"question": "Are shared budgets for couples in scope for launch?", "meeting": "design-review", "evidence": "shared budgets are out of scope"},
+  {"question": "How do we avoid a migration when adding shared budgets later?", "meeting": "design-review", "evidence": "owner list"},
+  {"question": "What bug caused duplicate transactions?", "meeting": "go-no-go", "evidence": "duplicate transactions after a token refresh"},
+  {"question": "What is the new launch date?", "meeting": "go-no-go", "evidence": "October 29th"},
+  {"question": "When will the dedupe fix ship?", "meeting": "go-no-go", "evidence": "dedupe fix by October 20th"},
+  {"question": "How did onboarding completion change with the new flow?", "meeting": "go-no-go", "evidence": "60 to 78 percent"},
+  {"question": "Will we have push notifications at launch?", "meeting": "go-no-go", "evidence": "email-only weekly summaries"},
+  {"question": "Who owns the weekly summary email?", "meeting": "go-no-go", "evidence": "own the weekly summary email"},
+  {"question": "Did Plaid confirm the pricing in writing?", "meeting": "go-no-go", "evidence": "confirmed the pricing in writing"},
+  {"question": "What is categorization accuracy in production?", "meeting": "go-no-go", "evidence": "94 percent accuracy in production"},
+  {"question": "Is the launch conditional on anything?", "meeting": "go-no-go", "evidence": "conditional on the dedupe fix"}
+]

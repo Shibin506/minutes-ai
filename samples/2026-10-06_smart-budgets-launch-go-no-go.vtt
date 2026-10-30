@@ -1,0 +1,89 @@
+WEBVTT
+
+1
+00:00:02.000 --> 00:00:10.292
+<v Priya>This is the launch go/no-go for Smart Budgets. Launch is currently set for October 15th. Let's go through each area.</v>
+
+2
+00:00:11.092 --> 00:00:20.538
+<v Aisha>Bank sync is the problem. We found a bug where some Chase and Wells Fargo accounts sync duplicate transactions after a token refresh.</v>
+
+3
+00:00:21.338 --> 00:00:24.246
+<v Marcus>How many users does that affect?</v>
+
+4
+00:00:25.046 --> 00:00:33.723
+<v Aisha>In the beta, about 8 percent of connected accounts. Duplicates double-count spending, so budgets show people as overspent when they're not.</v>
+
+5
+00:00:34.523 --> 00:00:39.738
+<v Priya>That's a launch blocker. People will lose trust in the numbers immediately.</v>
+
+6
+00:00:40.538 --> 00:00:50.753
+<v Aisha>I agree. The fix is to dedupe on Plaid's transaction ID and backfill existing data. I need about a week and a half including testing.</v>
+
+7
+00:00:51.553 --> 00:00:54.461
+<v Marcus>So we can't make the 15th.</v>
+
+8
+00:00:55.261 --> 00:01:05.092
+<v Priya>No. The decision is to move the launch to October 29th. That gives Aisha time for the fix plus a few days of buffer.</v>
+
+9
+00:01:05.892 --> 00:01:14.184
+<v Marcus>I'll tell sales and update the customer-facing date today. They'll be unhappy, but a delay is better than wrong numbers.</v>
+
+10
+00:01:14.984 --> 00:01:21.353
+<v Aisha>I'll ship the dedupe fix by October 20th and run the backfill on the 21st.</v>
+
+11
+00:01:22.153 --> 00:01:31.599
+<v Jordan>Categorization is in good shape. We're at 94 percent accuracy in production on beta traffic, and per-merchant caching is cutting costs as expected.</v>
+
+12
+00:01:32.399 --> 00:01:41.845
+<v Elena>Onboarding is done, including the empty state for failed bank sync. Beta completion went from 60 to 78 percent with the three-step flow.</v>
+
+13
+00:01:42.645 --> 00:01:48.630
+<v Priya>That's great work. What about notifications? We left that open at the design review.</v>
+
+14
+00:01:49.430 --> 00:01:57.722
+<v Elena>The mobile team still can't do push before November. I propose email-only weekly summaries for launch, and push in November.</v>
+
+15
+00:01:58.522 --> 00:02:04.507
+<v Marcus>Email-only is fine for launch. Most budgeting apps start with a weekly email anyway.</v>
+
+16
+00:02:05.307 --> 00:02:12.445
+<v Priya>Agreed, we'll go with email-only weekly summaries for launch. Jordan, can you own the weekly summary email?</v>
+
+17
+00:02:13.245 --> 00:02:18.845
+<v Jordan>Yes. I'll have the email template and send job ready by October 24th.</v>
+
+18
+00:02:19.645 --> 00:02:27.168
+<v Marcus>One more thing: the decision doc on Plaid. Finance asked whether the 30 cents per account still holds.</v>
+
+19
+00:02:27.968 --> 00:02:34.722
+<v Aisha>It does. Plaid confirmed the pricing in writing last week. I'll forward the email to finance.</v>
+
+20
+00:02:35.522 --> 00:02:39.584
+<v Priya>Is there anything else that could block the 29th?</v>
+
+21
+00:02:40.384 --> 00:02:47.907
+<v Aisha>Only if the backfill finds more edge cases. I'll give a status update on the 22nd either way.</v>
+
+22
+00:02:48.707 --> 00:02:57.384
+<v Priya>Okay. Final call: we are a go for October 29th, conditional on the dedupe fix landing by the 20th. Thanks, everyone.</v>
