@@ -35,7 +35,7 @@ class AskRequest(BaseModel):
 def create_app(settings: Settings | None = None, llm: LLM | None = None) -> FastAPI:
     settings = settings or Settings.from_env()
     store = Store(settings.db_path)
-    llm = llm or build_llm(settings.model, settings.demo_mode)
+    llm = llm or build_llm(settings)
     service = MeetingService(store, llm, settings.chunk_words)
 
     app = FastAPI(title="Minutes", version=__version__)

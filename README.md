@@ -3,10 +3,13 @@
 <p align="center"><b>An AI meeting copilot: drop in a transcript, get notes you can act on, then ask questions across every meeting with answers that cite the exact moment something was said.</b></p>
 
 <p align="center">
-  Python · FastAPI · SQLite FTS5 · Claude API · React + TypeScript · Docker · GitHub Actions
+  Python · FastAPI · SQLite FTS5 · Claude or Gemini API · React + TypeScript · Docker · GitHub Actions
 </p>
 
 ---
+
+<p align="center"><img src="docs/demo.gif" alt="A real session: three sample transcripts are loaded and analyzed by Gemini; the launch go/no-go meeting shows a summary and action items with owners, due dates and timestamps; the question 'Why did the launch date move?' streams back a cited answer; the action-item tracker lists commitments from every meeting" width="900"></p>
+<p align="center"><sub>A real session with <code>MINUTES_PROVIDER=gemini</code> (gemini-3-flash-preview), recorded in the browser (<a href="docs/demo.mp4">MP4</a>). The wait while the three meetings are analyzed is sped up 10×.</sub></p>
 
 ![Ask across meetings with cited answers](docs/images/ask.png)
 
@@ -17,6 +20,7 @@
 - **Ask questions across all your meetings.** *"Why did the launch date move?"* returns a short answer with numbered citations. Clicking a citation opens that meeting with the cited passage highlighted. Answers stream in as they're written.
 - **One action-item tracker for everything.** Every commitment from every meeting in one table, filterable by owner.
 - **Export notes as Markdown** for a doc, a wiki or a ticket.
+- **Claude or Gemini.** Claude by default; set `MINUTES_PROVIDER=gemini` to use Gemini, which has a free tier.
 - **Runs without an API key.** In demo mode a small rule-based engine stands in for the model, so you can try the whole app (and CI can test it) for free.
 
 | Meeting notes linked to the transcript | Action items across meetings |
@@ -97,7 +101,11 @@ npm run dev                        # http://localhost:5173, proxies /api to :800
 | Variable | Default | |
 |---|---|---|
 | `ANTHROPIC_API_KEY` | – | Without it, Minutes runs in demo mode |
-| `MINUTES_MODEL` | `claude-opus-5-5` | Model used for analysis and answers |
+| `MINUTES_MODEL` | `claude-opus-5-5` | Claude model used for analysis and answers |
+| `MINUTES_PROVIDER` | `claude` | `gemini` to use Gemini instead of Claude |
+| `GEMINI_API_KEY` | – | Gemini key; with `MINUTES_PROVIDER=gemini` and no key, Minutes runs in demo mode |
+| `MINUTES_GEMINI_MODEL` | `gemini-3.5-flash` | Gemini model |
+| `MINUTES_GEMINI_REASONING_EFFORT` | – | `low` / `medium` / `high`; empty uses the model's default |
 | `MINUTES_DEMO_MODE` | `auto` | `true` / `false` to force a mode |
 | `MINUTES_DB_PATH` | `data/minutes.db` | SQLite file |
 | `MINUTES_CHUNK_WORDS` | `160` | Retrieval chunk size |

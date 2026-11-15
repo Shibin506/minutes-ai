@@ -1,17 +1,20 @@
 """Language-model backends.
 
-`ClaudeLLM` is the real implementation. `DemoLLM` is a small rule-based stand-in
-so the app (and CI) runs end to end without an API key.
+`ClaudeLLM` is the default implementation and `GeminiLLM` an alternative (it has a
+free tier). `DemoLLM` is a small rule-based stand-in so the app (and CI) runs end
+to end without an API key.
 """
 
 from __future__ import annotations
 
+import json
 import re
 from collections import Counter
 from collections.abc import Iterator
 from typing import Protocol
 
 import anthropic
+import httpx
 
 from . import prompts
 from .schemas import ActionItem, Decision, MeetingAnalysis, Topic
@@ -93,6 +96,105 @@ class ClaudeLLM:
 
 
 # ---------------------------------------------------------------------------
+# Gemini
+# ---------------------------------------------------------------------------
+
+GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai"
+
+
+def _inline_refs(schema: dict) -> dict:
+    """Resolve local $refs: Gemini's structured output does not accept $defs."""
+    defs = schema.get("$defs", {})
+
+    def walk(node, is_properties=False):
+        if isinstance(node, dict):
+            if "$ref" in node and not is_properties:
+                return walk(defs[node["$ref"].split("/")[-1]])
+            if is_properties:  # keys here are field names (a field may be called "title")
+                return {k: walk(v) for k, v in node.items()}
+            return {
+                k: walk(v, is_properties=(k == "properties"))
+                for k, v in node.items()
+                if k not in ("$defs", "title")
+            }
+        if isinstance(node, list):
+            return [walk(v) for v in node]
+        return node
+
+    return walk(schema)
+
+
+class GeminiLLM:
+    """Gemini through its OpenAI-compatible endpoint: a strict JSON schema for the
+    analysis and server-sent events for streamed answers."""
+
+    def __init__(
+        self,
+        model: str = "gemini-3.5-flash",
+        api_key: str = "",
+        reasoning_effort: str = "",
+        base_url: str = GEMINI_BASE_URL,
+        http: httpx.Client | None = None,
+    ):
+        self.name = model
+        self.model = model
+        self.api_key = api_key
+        self.reasoning_effort = reasoning_effort
+        self.base_url = base_url.rstrip("/")
+        self.http = http or httpx.Client(timeout=180)
+        self.schema = _inline_refs(MeetingAnalysis.model_json_schema())
+
+    def _body(self, system: str, user: str, **extra) -> dict:
+        body = {
+            "model": self.model,
+            "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
+            **extra,
+        }
+        if self.reasoning_effort:
+            body["reasoning_effort"] = self.reasoning_effort
+        return body
+
+    def _headers(self) -> dict:
+        return {"Authorization": f"Bearer {self.api_key or 'unset'}"}
+
+    def analyze(self, title_hint: str, segments: list[Segment]) -> MeetingAnalysis:
+        body = self._body(
+            prompts.ANALYSIS_SYSTEM,
+            prompts.analysis_request(title_hint, segments),
+            response_format={
+                "type": "json_schema",
+                "json_schema": {"name": "meeting_analysis", "strict": True, "schema": self.schema},
+            },
+        )
+        r = self.http.post(f"{self.base_url}/chat/completions", headers=self._headers(), json=body)
+        if r.status_code >= 400:
+            raise AnalysisError(f"Gemini returned HTTP {r.status_code}: {r.text[:300]}")
+        choice = r.json()["choices"][0]
+        if choice.get("finish_reason") not in ("stop", None):
+            raise AnalysisError(f"The analysis stopped early ({choice.get('finish_reason')}).")
+        analysis = MeetingAnalysis.model_validate_json(choice["message"]["content"])
+        return clamp_segments(analysis, len(segments))
+
+    def stream_answer(self, question: str, hits: list[SearchHit]) -> Iterator[str]:
+        body = self._body(
+            prompts.ANSWER_SYSTEM, prompts.answer_request(question, hits), stream=True
+        )
+        with self.http.stream(
+            "POST", f"{self.base_url}/chat/completions", headers=self._headers(), json=body
+        ) as r:
+            if r.status_code >= 400:
+                r.read()
+                raise RuntimeError(f"Gemini returned HTTP {r.status_code}: {r.text[:300]}")
+            for line in r.iter_lines():
+                if not line.startswith("data: ") or line == "data: [DONE]":
+                    continue
+                for choice in json.loads(line[6:]).get("choices", []):
+                    text = (choice.get("delta") or {}).get("content")
+                    if text:
+                        yield text
+
+
+# ---------------------------------------------------------------------------
 # Demo mode
 # ---------------------------------------------------------------------------
 
@@ -169,7 +271,7 @@ class DemoLLM:
             summary=(
                 f"{len(speakers)} participants ({', '.join(speakers[:5])}) discussed "
                 f"{', '.join(keywords) or 'several topics'}. Running in demo mode: set "
-                "ANTHROPIC_API_KEY for a real summary."
+                "ANTHROPIC_API_KEY (or GEMINI_API_KEY) for a real summary."
             ),
             key_points=[s for _, s in sorted(long_sentences, reverse=True)[:4]],
             decisions=decisions[:6],
@@ -190,5 +292,11 @@ class DemoLLM:
             yield f"- {best} [S{i}]\n"
 
 
-def build_llm(model: str, demo_mode: bool) -> LLM:
-    return DemoLLM() if demo_mode else ClaudeLLM(model)
+def build_llm(settings) -> LLM:
+    if settings.demo_mode:
+        return DemoLLM()
+    if settings.provider == "gemini":
+        return GeminiLLM(
+            settings.gemini_model, settings.gemini_api_key, settings.gemini_reasoning_effort
+        )
+    return ClaudeLLM(settings.model)
