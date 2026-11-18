@@ -36,6 +36,23 @@ describe("splitCitations", () => {
   });
 });
 
+describe("splitCitations with Markdown", () => {
+  it("renders **bold** spans and keeps citations", () => {
+    expect(splitCitations("**Bug:** duplicates [S1].")).toEqual([
+      { kind: "text", text: "Bug:", bold: true },
+      { kind: "text", text: " duplicates " },
+      { kind: "cite", index: 1 },
+      { kind: "text", text: "." },
+    ]);
+  });
+
+  it("turns Markdown bullets into dots and leaves an unclosed ** alone", () => {
+    expect(splitCitations("Two reasons:\n*   one\n- two **unfinis")).toEqual([
+      { kind: "text", text: "Two reasons:\n• one\n• two **unfinis" },
+    ]);
+  });
+});
+
 describe("parseSSE", () => {
   it("returns complete events and keeps the partial tail", () => {
     const buffer =

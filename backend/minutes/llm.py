@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import re
+import time
 from collections import Counter
 from collections.abc import Iterator
 from typing import Protocol
@@ -100,6 +101,9 @@ class ClaudeLLM:
 # ---------------------------------------------------------------------------
 
 GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai"
+# Gemini answers 503 "high demand" in short bursts; a few quick retries ride them out.
+GEMINI_RETRY_STATUSES = {500, 502, 503}
+GEMINI_RETRY_DELAYS = (2.0, 5.0, 10.0)
 
 
 def _inline_refs(schema: dict) -> dict:
@@ -135,6 +139,7 @@ class GeminiLLM:
         reasoning_effort: str = "",
         base_url: str = GEMINI_BASE_URL,
         http: httpx.Client | None = None,
+        retry_delays: tuple[float, ...] = GEMINI_RETRY_DELAYS,
     ):
         self.name = model
         self.model = model
@@ -142,6 +147,7 @@ class GeminiLLM:
         self.reasoning_effort = reasoning_effort
         self.base_url = base_url.rstrip("/")
         self.http = http or httpx.Client(timeout=180)
+        self.retry_delays = retry_delays
         self.schema = _inline_refs(MeetingAnalysis.model_json_schema())
 
     def _body(self, system: str, user: str, **extra) -> dict:
@@ -166,7 +172,13 @@ class GeminiLLM:
                 "json_schema": {"name": "meeting_analysis", "strict": True, "schema": self.schema},
             },
         )
-        r = self.http.post(f"{self.base_url}/chat/completions", headers=self._headers(), json=body)
+        url = f"{self.base_url}/chat/completions"
+        r = self.http.post(url, headers=self._headers(), json=body)
+        for delay in self.retry_delays:
+            if r.status_code not in GEMINI_RETRY_STATUSES:
+                break
+            time.sleep(delay)
+            r = self.http.post(url, headers=self._headers(), json=body)
         if r.status_code >= 400:
             raise AnalysisError(f"Gemini returned HTTP {r.status_code}: {r.text[:300]}")
         choice = r.json()["choices"][0]

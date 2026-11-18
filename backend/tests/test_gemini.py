@@ -91,3 +91,30 @@ def test_settings_read_the_gemini_key(monkeypatch):
     assert s.provider == "gemini" and not s.demo_mode and s.gemini_api_key == "k"
     monkeypatch.delenv("GEMINI_API_KEY")
     assert Settings.from_env().demo_mode
+
+
+@respx.mock
+def test_analyze_retries_temporary_overload():
+    route = respx.post(URL).mock(
+        side_effect=[
+            httpx.Response(503, json={"error": "high demand"}),
+            httpx.Response(
+                200,
+                json={
+                    "choices": [
+                        {"finish_reason": "stop", "message": {"content": json.dumps(ANALYSIS)}}
+                    ]
+                },
+            ),
+        ]
+    )
+    result = GeminiLLM(retry_delays=(0, 0)).analyze("Sync", SEGMENTS)
+    assert result.title == "Sync" and route.call_count == 2
+
+
+@respx.mock
+def test_analyze_gives_up_after_the_retries():
+    route = respx.post(URL).mock(return_value=httpx.Response(503, json={"error": "busy"}))
+    with pytest.raises(AnalysisError, match="503"):
+        GeminiLLM(retry_delays=(0, 0)).analyze("Sync", SEGMENTS)
+    assert route.call_count == 3

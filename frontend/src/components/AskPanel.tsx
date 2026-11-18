@@ -94,7 +94,11 @@ export function AskPanel({ meetingId, placeholder, suggestions = [], onOpenSourc
           <div className="answer-text">
             {splitCitations(answer).map((part, i) =>
               part.kind === "text" ? (
-                <span key={i}>{part.text}</span>
+                part.bold ? (
+                  <strong key={i}>{part.text}</strong>
+                ) : (
+                  <span key={i}>{part.text}</span>
+                )
               ) : (
                 <button
                   key={i}
