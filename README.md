@@ -8,8 +8,8 @@
 
 ---
 
-<p align="center"><a href="docs/demo-narrated.mp4"><img src="docs/images/demo-narrated-poster.jpg" alt="Play the narrated 1 minute 45 second demo of Minutes" width="900"></a></p>
-<p align="center"><sub>▶ <a href="docs/demo-narrated.mp4"><b>Narrated demo, 1:45</b></a>: the real app on Gemini, with captions. Voiceover generated with <a href="https://elevenlabs.io">ElevenLabs</a> from a script based on this README. The silent GIF below shows the same flow.</sub></p>
+<p align="center"><a href="https://youtu.be/X2rIOmC_pgo"><img src="docs/images/demo-narrated-poster.jpg" alt="Play the narrated 1 minute 45 second demo of Minutes" width="900"></a></p>
+<p align="center"><sub>▶ <a href="https://youtu.be/X2rIOmC_pgo"><b>Watch the narrated demo on YouTube (1:45)</b></a> (or the <a href="docs/demo-narrated.mp4">MP4</a>): the real app on Gemini, with captions. Voiceover generated with <a href="https://elevenlabs.io">ElevenLabs</a> from a script based on this README. The silent GIF below shows the same flow.</sub></p>
 
 <p align="center"><img src="docs/demo.gif" alt="A real session: three sample transcripts are loaded and analyzed by Gemini; the launch go/no-go meeting shows a summary and action items with owners, due dates and timestamps; the question 'Why did the launch date move?' streams back a cited answer; the action-item tracker lists commitments from every meeting" width="900"></p>
 <p align="center"><sub>A real session with <code>MINUTES_PROVIDER=gemini</code> (gemini-3-flash-preview), recorded in the browser (<a href="docs/demo.mp4">MP4</a>). The wait while the three meetings are analyzed is sped up 10×.</sub></p>
