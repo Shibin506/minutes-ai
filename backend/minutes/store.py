@@ -70,6 +70,13 @@ class SearchHit:
     end: float
     text: str
     score: float
+    #: YYYY-MM-DD of the meeting (from a date-prefixed file name, else the upload date).
+    meeting_date: str = ""
+
+
+def _date(source_name: str, created_at: str) -> str:
+    m = re.match(r"(\d{4}-\d{2}-\d{2})", source_name)
+    return m[1] if m else created_at[:10]
 
 
 def fts_query(question: str) -> str:
@@ -165,10 +172,10 @@ class Store:
 
     def all_chunks(self) -> list[SearchHit]:
         rows = self._conn.execute(
-            "SELECT c.meeting_id, m.title, c.idx, c.start, c.end, c.text FROM chunks c "
-            "JOIN meetings m ON m.id = c.meeting_id ORDER BY c.id"
+            "SELECT c.meeting_id, m.title, c.idx, c.start, c.end, c.text, m.source_name, "
+            "m.created_at FROM chunks c JOIN meetings m ON m.id = c.meeting_id ORDER BY c.id"
         ).fetchall()
-        return [SearchHit(r[0], r[1], r[2], r[3], r[4], r[5], 0.0) for r in rows]
+        return [SearchHit(r[0], r[1], r[2], r[3], r[4], r[5], 0.0, _date(r[6], r[7])) for r in rows]
 
     def search(self, question: str, k: int = 8, meeting_id: str | None = None) -> list[SearchHit]:
         query = fts_query(question)
@@ -176,7 +183,8 @@ class Store:
             return []
         sql = (
             "SELECT c.meeting_id, m.title, c.idx, c.start, c.end, c.text, "
-            "bm25(chunks_fts) AS score FROM chunks_fts JOIN chunks c ON c.id = chunks_fts.rowid "
+            "bm25(chunks_fts) AS score, m.source_name, m.created_at "
+            "FROM chunks_fts JOIN chunks c ON c.id = chunks_fts.rowid "
             "JOIN meetings m ON m.id = c.meeting_id "
             "WHERE chunks_fts MATCH ?"
         )
@@ -188,4 +196,6 @@ class Store:
         params.append(k)
         rows = self._conn.execute(sql, params).fetchall()
         # bm25() is lower-is-better; flip the sign so callers can sort descending.
-        return [SearchHit(r[0], r[1], r[2], r[3], r[4], r[5], -r[6]) for r in rows]
+        return [
+            SearchHit(r[0], r[1], r[2], r[3], r[4], r[5], -r[6], _date(r[7], r[8])) for r in rows
+        ]

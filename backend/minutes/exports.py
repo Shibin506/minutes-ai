@@ -136,4 +136,13 @@ def follow_up(meeting: dict, llm) -> FollowUp:
         + "\n"
         "Open questions:\n" + "\n".join(f"- {q}" for q in a["open_questions"])
     )
-    return llm.complete_json(FOLLOW_UP_SYSTEM, notes, FollowUp)
+    email = llm.complete_json(FOLLOW_UP_SYSTEM, notes, FollowUp)
+    return FollowUp(subject=email.subject.strip(), body=clean_text(email.body))
+
+
+def clean_text(text: str) -> str:
+    """Drop the junk small models sometimes emit at the end of a JSON string (runs of braces and
+    a stray closing quote) and collapse extra blank lines."""
+    text = re.sub(r"[\s{}]+$", "", text)
+    text = re.sub(r'"$', "", text)
+    return re.sub(r"\n{3,}", "\n\n", text).strip()

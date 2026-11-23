@@ -100,7 +100,7 @@ def test_stream_answer_yields_text_and_cites_sources():
     llm = ClaudeLLM(client=fake_client(messages))
     assert "".join(llm.stream_answer("When is launch?", [hit])) == "Launch is June [S1]."
     prompt = messages.calls[0][1]["messages"][0]["content"]
-    assert '<source id="S1" meeting="Planning" time="00:00-00:30">' in prompt
+    assert '<source id="S1" meeting="Planning" date="" time="00:00-00:30">' in prompt
 
 
 def test_stream_answer_reports_refusal():

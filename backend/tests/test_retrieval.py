@@ -54,3 +54,15 @@ def test_hybrid_search_refreshes_when_meetings_change():
         "b.vtt",
     )
     assert any("Premium" in h.text for h in r.search("premium price", k=3))
+
+
+def test_diversify_caps_passages_per_meeting():
+    from minutes.retrieval import diversify
+
+    hits = [SearchHit("a", "A", i, 0, 1, "t", 1.0) for i in range(5)] + [
+        SearchHit("b", "B", 0, 0, 1, "t", 0.5)
+    ]
+    out = diversify(hits, k=4, per_meeting=3)
+    assert [(h.meeting_id, h.chunk_index) for h in out] == [("a", 0), ("a", 1), ("a", 2), ("b", 0)]
+    # Not enough other meetings: the overflow fills the rest.
+    assert len(diversify(hits, k=6, per_meeting=3)) == 6

@@ -148,6 +148,11 @@ RETRY_DELAYS = (2.0, 5.0, 10.0)
 GEMINI_RETRY_DELAYS = RETRY_DELAYS
 
 
+#: Some models write citations as 【S1】 and use narrow no-break spaces and hyphens; the UI
+#: links "[S1]" and people search for "March 15". Per character, so it is safe on a stream.
+PLAIN_TEXT = str.maketrans({"【": "[", "】": "]", "\u202f": " ", "\u00a0": " ", "\u2011": "-"})
+
+
 def _wait(r: httpx.Response, default: float) -> float:
     """How long to back off: the provider's retry-after when it gives one (rate limits)."""
     try:
@@ -350,19 +355,32 @@ class OpenAICompatLLM:
             effort=self.light_effort,
             stream=True,
         )
-        with self.http.stream(
-            "POST", f"{self.base_url}/chat/completions", headers=self._headers(), json=body
-        ) as r:
-            if r.status_code >= 400:
-                r.read()
-                raise RuntimeError(f"{self.provider} returned HTTP {r.status_code}: {r.text[:300]}")
-            for line in r.iter_lines():
-                if not line.startswith("data: ") or line == "data: [DONE]":
-                    continue
-                for choice in json.loads(line[6:]).get("choices", []):
-                    text = (choice.get("delta") or {}).get("content")
-                    if text:
-                        yield text
+        models = [self.model]
+        for attempt, model in enumerate(models):
+            with self.http.stream(
+                "POST",
+                f"{self.base_url}/chat/completions",
+                headers=self._headers(),
+                json={**body, "model": model},
+            ) as r:
+                if r.status_code >= 400:
+                    r.read()
+                    if attempt == 0 and (more := self._quota_fallbacks(r)):
+                        models += more  # out of daily quota: answer with another model
+                        continue
+                    if r.status_code == 429 and attempt < len(models) - 1:
+                        continue
+                    raise RuntimeError(
+                        f"{self.provider} returned HTTP {r.status_code}: {r.text[:300]}"
+                    )
+                for line in r.iter_lines():
+                    if not line.startswith("data: ") or line == "data: [DONE]":
+                        continue
+                    for choice in json.loads(line[6:]).get("choices", []):
+                        text = (choice.get("delta") or {}).get("content")
+                        if text:
+                            yield text.translate(PLAIN_TEXT)
+                return
 
 
 class GeminiLLM(OpenAICompatLLM):
@@ -537,7 +555,15 @@ def build_reranker(settings, llm: LLM) -> LLM | None:
     if getattr(llm, "demo", False):
         return None
     if settings.provider == "groq":
-        return GroqLLM(settings.groq_rerank_model, settings.groq_api_key, reasoning_effort="low")
+        # Reranking is an optimization: fail fast (one short retry, a 15 s timeout) rather
+        # than hold up an answer waiting out a rate limit.
+        return GroqLLM(
+            settings.groq_rerank_model,
+            settings.groq_api_key,
+            reasoning_effort="low",
+            http=httpx.Client(timeout=15),
+            retry_delays=(2.0,),
+        )
     return llm
 
 

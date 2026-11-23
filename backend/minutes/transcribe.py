@@ -8,6 +8,7 @@ labelled with one speaker name; upload a VTT export from Zoom/Meet/Teams to keep
 
 from __future__ import annotations
 
+import re
 from functools import lru_cache
 from pathlib import Path
 
@@ -50,11 +51,31 @@ def transcribe_groq(
     segments = body.get("segments") or [
         {"start": 0.0, "end": body.get("duration", 0.0), "text": body.get("text", "")}
     ]
+    kept = [s for s in segments if s.get("text", "").strip() and s.get("no_speech_prob", 0) < 0.8]
+    # A chunk that is nothing but a stock phrase is silence or noise: Whisper was trained on
+    # captioned video and "hears" these when nobody speaks.
+    if all(_words(s["text"]) in SILENCE_PHRASES for s in kept):
+        return []
     return [
         Segment(speaker, offset + float(s["start"]), offset + float(s["end"]), s["text"].strip())
-        for s in segments
-        if s.get("text", "").strip() and s.get("no_speech_prob", 0) < 0.8
+        for s in kept
     ]
+
+
+SILENCE_PHRASES = {
+    "thank you",
+    "thank you very much",
+    "thanks",
+    "thanks for watching",
+    "thank you for watching",
+    "please subscribe",
+    "bye",
+    "you",
+}
+
+
+def _words(text: str) -> str:
+    return " ".join(re.sub(r"[^a-z ]", " ", text.lower()).split())
 
 
 @lru_cache(maxsize=1)

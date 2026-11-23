@@ -10,6 +10,8 @@ interface Props {
 
 const CHUNK_MS = 8000;
 const NOTES_EVERY_MS = 30000;
+/** RMS level below which a whole chunk counts as silence and isn't sent for transcription. */
+const SILENCE_RMS = 0.01;
 
 type SpeechRecognitionLike = {
   continuous: boolean;
@@ -96,6 +98,22 @@ export function LiveMeeting({ serverTranscription, onSaved }: Props) {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         cleanups.push(() => stream.getTracks().forEach((t) => t.stop()));
         const mime = pickMime();
+        // Track the loudest moment of each chunk, so silent chunks are skipped: it saves a
+        // request, and Whisper tends to invent words ("Thank you.") for silence.
+        const audio = new AudioContext();
+        const analyser = audio.createAnalyser();
+        audio.createMediaStreamSource(stream).connect(analyser);
+        const buf = new Float32Array(analyser.fftSize);
+        let level = { peak: 0 }; // the chunk being recorded
+        const meter = setInterval(() => {
+          analyser.getFloatTimeDomainData(buf);
+          const rms = Math.sqrt(buf.reduce((a, v) => a + v * v, 0) / buf.length);
+          level.peak = Math.max(level.peak, rms);
+        }, 100);
+        cleanups.push(
+          () => clearInterval(meter),
+          () => void audio.close(),
+        );
         // One recorder per chunk, so every chunk is a complete, playable file.
         const chunks: Segment[][] = [];
         let index = 0;
@@ -105,8 +123,10 @@ export function LiveMeeting({ serverTranscription, onSaved }: Props) {
           const offset = (performance.now() - t0) / 1000;
           const rec = new MediaRecorder(stream, { mimeType: mime });
           const parts: Blob[] = [];
+          const chunkLevel = (level = { peak: 0 });
           rec.ondataavailable = (e) => e.data.size && parts.push(e.data);
           rec.onstop = () => {
+            if (chunkLevel.peak < SILENCE_RMS) return;
             const blob = new Blob(parts, { type: mime });
             const prompt = segsRef.current
               .map((s) => s.text)

@@ -26,10 +26,12 @@ Guidelines:
 ANSWER_SYSTEM = """\
 You answer questions about a team's past meetings using only the transcript excerpts provided.
 
-Each excerpt is wrapped in <source id="S#" meeting="..." time="...">. Cite every claim with
-the id(s) of the excerpt(s) that support it, in square brackets, e.g. "We moved launch to
-June [S2]." Combine information across meetings when the question needs it, and say which
-meeting said what when they disagree; later meetings supersede earlier ones.
+Each excerpt is wrapped in <source id="S#" meeting="..." date="YYYY-MM-DD" time="...">. Cite
+every claim with the id(s) of the excerpt(s) that support it, in square brackets, e.g. "We
+moved launch to June [S2]." Combine information across meetings when the question needs it.
+When meetings disagree, the one with the latest date is the current state: lead with it, and
+mention earlier values only as history ("moved from Q2 to March 15"). Write dates the way
+the transcript says them; don't add a year it doesn't state.
 
 If the excerpts don't contain the answer, say so plainly and suggest what to search for
 instead. Keep answers short: a direct answer first, then supporting detail as bullets
@@ -51,7 +53,7 @@ def analysis_request(title_hint: str, segments: list[Segment]) -> str:
 
 def answer_request(question: str, hits: list[SearchHit]) -> str:
     sources = "\n\n".join(
-        f'<source id="S{i}" meeting="{h.meeting_title}" '
+        f'<source id="S{i}" meeting="{h.meeting_title}" date="{h.meeting_date}" '
         f'time="{format_timestamp(h.start)}-{format_timestamp(h.end)}">\n{h.text}\n</source>'
         for i, h in enumerate(hits, start=1)
     )

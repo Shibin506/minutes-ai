@@ -146,3 +146,37 @@ def test_daily_quota_falls_back_to_another_model():
     llm = GroqLLM(api_key="k", retry_delays=())
     assert llm.complete("sys", "hi") == "Fine"
     assert seen == ["openai/gpt-oss-120b", "openai/gpt-oss-20b"]
+
+
+@respx.mock
+def test_streamed_answers_fall_back_on_daily_quota():
+    def chat(request):
+        model = json.loads(request.content)["model"]
+        if model == "openai/gpt-oss-120b":
+            return httpx.Response(
+                429, headers={"retry-after": "600"}, json={"error": {"message": "tokens per day"}}
+            )
+        delta = json.dumps({"choices": [{"delta": {"content": "Moved to March 15 [S1]."}}]})
+        sse = f"data: {delta}\n\ndata: [DONE]\n\n"
+        return httpx.Response(200, text=sse, headers={"content-type": "text/event-stream"})
+
+    respx.post(URL).mock(side_effect=chat)
+    out = "".join(GroqLLM(api_key="k", retry_delays=()).stream_answer("When?", []))
+    assert out == "Moved to March 15 [S1]."
+
+
+def test_whisper_silence_hallucination_dropped():
+    from minutes.transcribe import transcribe_groq
+
+    def handler(request):
+        return httpx.Response(
+            200,
+            json={
+                "segments": [
+                    {"start": 0.0, "end": 8.0, "text": " Thank you.", "no_speech_prob": 0.4}
+                ]
+            },
+        )
+
+    http = httpx.Client(transport=httpx.MockTransport(handler))
+    assert transcribe_groq(b"x", "c.webm", "k", http=http) == []

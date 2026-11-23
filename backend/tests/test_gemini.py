@@ -60,13 +60,14 @@ def test_analyze_errors_are_reported():
 def test_stream_answer_yields_text_deltas():
     chunks = [
         {"choices": [{"delta": {"content": "The launch moved "}}]},
-        {"choices": [{"delta": {"content": "to May [S1]."}}]},
+        {"choices": [{"delta": {"content": "to May\u202f15 【S1"}}]},
+        {"choices": [{"delta": {"content": "】."}}]},
         {"choices": [{"delta": {}, "finish_reason": "stop"}]},
     ]
     sse = "".join(f"data: {json.dumps(c)}\n\n" for c in chunks) + "data: [DONE]\n\n"
     route = respx.post(URL).mock(return_value=httpx.Response(200, text=sse))
     hits = [SearchHit("m1", "Launch", 0, 0, 10, "Ann: we move the launch to May.", 1.0)]
-    assert "".join(GeminiLLM().stream_answer("Why?", hits)) == "The launch moved to May [S1]."
+    assert "".join(GeminiLLM().stream_answer("Why?", hits)) == "The launch moved to May 15 [S1]."
     assert json.loads(route.calls[0].request.content)["stream"] is True
 
 

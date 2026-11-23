@@ -143,7 +143,22 @@ class Rerank(BaseModel):
 
 RERANK_SYSTEM = """\
 You rank meeting-transcript passages by how directly they answer a question.
-Return the passage numbers, best first. Include every passage number exactly once."""
+When the question is about a current state (a date, a plan, a price), passages from later
+meetings that update it rank higher. Return the passage numbers, best first, each exactly once."""
+
+
+def diversify(hits: Sequence[SearchHit], k: int, per_meeting: int = 3) -> list[SearchHit]:
+    """Top `k` with at most `per_meeting` passages from any one meeting (the overflow fills in
+    only if there aren't enough others), so a question spanning meetings sees more of them."""
+    counts: Counter[str] = Counter()
+    picked, overflow = [], []
+    for h in hits:
+        if counts[h.meeting_id] < per_meeting:
+            counts[h.meeting_id] += 1
+            picked.append(h)
+        else:
+            overflow.append(h)
+    return (picked + overflow)[:k]
 
 
 def rrf(rankings: Sequence[Sequence[SearchHit]], k: int = RRF_K) -> list[SearchHit]:
@@ -209,11 +224,16 @@ class Retriever:
         if not hits or self.llm is None or getattr(self.llm, "demo", True):
             return hits
         passages = "\n\n".join(
-            f"[{i}] ({h.meeting_title})\n{h.text[:600]}" for i, h in enumerate(hits, start=1)
+            f"[{i}] ({h.meeting_title}, {h.meeting_date})\n{h.text[:500]}"
+            for i, h in enumerate(hits, start=1)
         )
         try:
             order = self.llm.complete_json(
-                RERANK_SYSTEM, f"Question: {question}\n\nPassages:\n{passages}", Rerank, light=True
+                RERANK_SYSTEM,
+                f"Question: {question}\n\nPassages:\n{passages}",
+                Rerank,
+                light=True,
+                max_tokens=1200,
             ).ranking
         except Exception:  # noqa: BLE001 - reranking is an improvement, never a requirement
             return hits
@@ -234,6 +254,6 @@ class Retriever:
             return bm25[:k]
         fused = rrf([bm25, self.dense(question, self.pool, meeting_id)])
         if mode == "hybrid+rerank":
-            top = self.rerank(question, fused[: max(k, 10)])
+            top = self.rerank(question, fused[: max(k, 16)])
             fused = top + fused[len(top) :]
-        return fused[:k]
+        return fused[:k] if meeting_id else diversify(fused, k)

@@ -71,3 +71,11 @@ def test_follow_up_template_in_demo_mode():
         and "- Marcus - Tell sales (today)" in f.body
         and "Push or email?" in f.body
     )
+
+
+def test_clean_text_drops_trailing_junk():
+    from minutes.exports import clean_text
+
+    junk = 'Best,\n[Your name]"}  }  }  }  }  }\n  }  }  }'
+    assert clean_text(junk) == "Best,\n[Your name]"
+    assert clean_text("Thanks,\nPriya") == "Thanks,\nPriya"
