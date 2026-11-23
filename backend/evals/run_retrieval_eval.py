@@ -103,6 +103,11 @@ def main() -> None:
     parser.add_argument(
         "--rerank", action="store_true", help="also try LLM reranking (GROQ_API_KEY)"
     )
+    parser.add_argument(
+        "--rerank-model",
+        default="openai/gpt-oss-20b",
+        help="Groq model for --rerank (e.g. qwen/qwen3.8-27b)",
+    )
     parser.add_argument("--json", type=Path, help="write the results table as JSON")
     args = parser.parse_args()
 
@@ -120,16 +125,19 @@ def main() -> None:
     if args.rerank:
         from minutes.llm import GroqLLM
 
+        effort = "none" if "qwen" in args.rerank_model else "low"
         groq = GroqLLM(
-            "openai/gpt-oss-20b",
+            args.rerank_model,
             os.environ["GROQ_API_KEY"],
-            reasoning_effort="low",
+            reasoning_effort=effort,
             retry_delays=(10.0, 20.0, 30.0, 60.0, 60.0),  # free tier: 8K tokens a minute
         )
         groq.quota_fallbacks = ()  # measure this model: wait out rate limits, don't switch
-        configs.append(("Hybrid (LSA) + Groq rerank", "hybrid+rerank", None, groq))
+        groq.light_effort = effort
+        short = args.rerank_model.split("/")[-1]
+        configs.append((f"Hybrid (LSA) + {short} rerank", "hybrid+rerank", None, groq))
         if args.gemini:
-            configs.append(("Hybrid (Gemini) + Groq rerank", "hybrid+rerank", gem, groq))
+            configs.append((f"Hybrid (Gemini) + {short} rerank", "hybrid+rerank", gem, groq))
 
     rows = []
     print(f"{'method':38s} {'set':11s} {'n':>3s} {'hit@1':>6s} {'hit@3':>6s} {'MRR':>5s}")

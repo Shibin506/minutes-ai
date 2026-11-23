@@ -256,10 +256,14 @@ class OpenAICompatLLM:
             r = self.http.post(url, headers=self._headers(), json=body)
         # Out of quota for a long time (a daily limit): try the provider's other models.
         for model in self._quota_fallbacks(r):
-            r = self.http.post(url, headers=self._headers(), json={**body, "model": model})
+            r = self.http.post(url, headers=self._headers(), json=self._for_model(body, model))
             if r.status_code != 429:
                 break
         return r
+
+    def _for_model(self, body: dict, model: str) -> dict:
+        """The request body for `model` (a fallback may need different settings)."""
+        return {**body, "model": model}
 
     def _fallback_model(self, r: httpx.Response) -> bool:
         """Override to switch to a current model when the configured one is retired."""
@@ -365,7 +369,7 @@ class OpenAICompatLLM:
                 "POST",
                 f"{self.base_url}/chat/completions",
                 headers=self._headers(),
-                json={**body, "model": model},
+                json=self._for_model(body, model),
             ) as r:
                 if r.status_code >= 400:
                     r.read()
@@ -418,9 +422,19 @@ class GroqLLM(OpenAICompatLLM):
         model: str = "openai/gpt-oss-120b",
         api_key: str = "",
         reasoning_effort: str = "medium",
+        quota_fallbacks: tuple[str, ...] | None = None,
         **kw,
     ):
         super().__init__(model, api_key, reasoning_effort, **kw)
+        if quota_fallbacks is not None:
+            self.quota_fallbacks = quota_fallbacks
+
+    def _for_model(self, body: dict, model: str) -> dict:
+        body = super()._for_model(body, model)
+        # Qwen reasons at length even on "low"; for a short call, "none" is what was meant.
+        if "qwen" in model and body.get("reasoning_effort") == "low":
+            body["reasoning_effort"] = "none"
+        return body
 
     def _fallback_model(self, r: httpx.Response) -> bool:
         try:
@@ -571,6 +585,7 @@ def build_reranker(settings, llm: LLM) -> LLM | None:
             reasoning_effort="low",
             http=httpx.Client(timeout=15),
             retry_delays=(2.0,),
+            quota_fallbacks=("qwen/qwen3.8-27b",),  # its own daily quota
         )
     return llm
 

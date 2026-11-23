@@ -197,3 +197,35 @@ def test_streamed_answers_wait_out_a_per_minute_limit(monkeypatch):
     respx.post(URL).mock(side_effect=chat)
     assert "".join(GroqLLM(api_key="k").stream_answer("When?", [])) == "Ok [S1]."
     assert calls == ["openai/gpt-oss-120b", "openai/gpt-oss-120b"]
+
+
+@respx.mock
+def test_reranker_falls_back_to_qwen_without_reasoning():
+    from minutes.config import Settings
+    from minutes.llm import build_reranker
+    from minutes.retrieval import Rerank
+
+    bodies = []
+
+    def chat(request):
+        body = json.loads(request.content)
+        bodies.append(body)
+        if body["model"] == "openai/gpt-oss-20b":
+            return httpx.Response(429, json={"error": {"message": "tokens per day (TPD)"}})
+        return httpx.Response(
+            200,
+            json={
+                "choices": [
+                    {"message": {"content": '{"ranking": [2, 1]}'}, "finish_reason": "stop"}
+                ]
+            },
+        )
+
+    respx.post(URL).mock(side_effect=chat)
+    from dataclasses import replace
+
+    settings = replace(Settings.from_env(), provider="groq", groq_api_key="k")
+    reranker = build_reranker(settings, GroqLLM(api_key="k"))
+    assert reranker.complete_json("s", "u", Rerank, light=True).ranking == [2, 1]
+    assert [b["model"] for b in bodies] == ["openai/gpt-oss-20b", "qwen/qwen3.8-27b"]
+    assert bodies[1]["reasoning_effort"] == "none"
