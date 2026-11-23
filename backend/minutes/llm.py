@@ -585,7 +585,9 @@ def build_reranker(settings, llm: LLM) -> LLM | None:
             reasoning_effort="low",
             http=httpx.Client(timeout=15),
             retry_delays=(2.0,),
-            quota_fallbacks=("qwen/qwen3.8-27b",),  # its own daily quota
+            # No fallback model: on the retrieval eval a small non-reasoning model (Qwen 3.8
+            # 27B) re-ranked worse than no re-ranking at all, so keep the hybrid order instead.
+            quota_fallbacks=(),
         )
     return llm
 
