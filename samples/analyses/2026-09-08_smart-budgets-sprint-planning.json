@@ -1,0 +1,94 @@
+{
+ "title": "Smart Budgets Sprint Planning",
+ "summary": "The team set the public launch date for Smart Budgets to October 15th and chose Plaid as the bank‑sync provider for this sprint. Aisha will integrate Plaid in the sandbox with staging syncs ready by Friday, while Jordan will prototype an LLM‑based transaction categorizer and report accuracy by the sprint review on the 19th. A design review of the onboarding mocks is scheduled for the 22nd, with Elena sending the Figma link by Thursday. The question of supporting shared budgets for couples remains open for a later decision.",
+ "key_points": [
+  "Sprint goal is to deliver the budgeting engine and bank sync end‑to‑end",
+  "Public launch target fixed for October 15th",
+  "Decision to use Plaid for bank sync; cost ~30¢ per connected account per month",
+  "Plaid sandbox integration to be in staging by Friday",
+  "Current rule‑based categorizer accuracy is 70%; need 90% for launch",
+  "Plan to prototype an LLM categorizer and measure accuracy by sprint review",
+  "Design onboarding mocks ready; design review set for the 22nd",
+  "Figma link to be shared by Thursday",
+  "Shared budgets for couples left as an open question"
+ ],
+ "decisions": [
+  {
+   "decision": "Public launch date set to October 15th",
+   "segment": 2
+  },
+  {
+   "decision": "Use Plaid for bank sync at launch",
+   "segment": 7
+  },
+  {
+   "decision": "Design review scheduled for the 22nd",
+   "segment": 18
+  },
+  {
+   "decision": "Shared budgets will not be included at launch and will be decided later",
+   "segment": 21
+  }
+ ],
+ "action_items": [
+  {
+   "task": "Write decision doc and share with finance",
+   "owner": "Marcus",
+   "due": "Wednesday",
+   "segment": 8
+  },
+  {
+   "task": "Start Plaid sandbox integration and have transactions syncing in staging",
+   "owner": "Aisha",
+   "due": "Friday",
+   "segment": 9
+  },
+  {
+   "task": "Prototype LLM categorizer and deliver accuracy numbers by sprint review on the 19th",
+   "owner": "Jordan",
+   "due": "19th",
+   "segment": 16
+  },
+  {
+   "task": "Send Figma link to everyone before design review",
+   "owner": "Elena",
+   "due": "Thursday",
+   "segment": 19
+  }
+ ],
+ "open_questions": [
+  "Do we support shared budgets for couples at launch?"
+ ],
+ "topics": [
+  {
+   "name": "Sprint goal and launch date",
+   "first_segment": 0,
+   "last_segment": 2
+  },
+  {
+   "name": "Bank sync provider selection",
+   "first_segment": 3,
+   "last_segment": 8
+  },
+  {
+   "name": "Plaid sandbox integration",
+   "first_segment": 9,
+   "last_segment": 9
+  },
+  {
+   "name": "Budgeting engine categorization risk",
+   "first_segment": 10,
+   "last_segment": 16
+  },
+  {
+   "name": "Design review scheduling",
+   "first_segment": 17,
+   "last_segment": 19
+  },
+  {
+   "name": "Shared budgets open question",
+   "first_segment": 20,
+   "last_segment": 21
+  }
+ ]
+}

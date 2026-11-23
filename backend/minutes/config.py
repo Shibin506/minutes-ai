@@ -21,10 +21,13 @@ class Settings:
     gemini_reasoning_effort: str = ""  # "low" | "medium" | "high"; empty = model default
     groq_model: str = "openai/gpt-oss-120b"
     groq_api_key: str = ""
+    groq_rerank_model: str = "openai/gpt-oss-20b"
     #: Analyze uploads inside the request (serverless hosts can't run background tasks).
     sync_analysis: bool = False
     #: Retrieval: "bm25", "hybrid" (BM25 + vectors, fused) or "hybrid+rerank" (then LLM reranking).
     retrieval: str = "hybrid"
+    #: Hosted demo: load the sample meetings (with saved analyses) when the database is empty.
+    seed_samples: bool = False
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -58,6 +61,8 @@ class Settings:
             gemini_reasoning_effort=os.getenv("MINUTES_GEMINI_REASONING_EFFORT", ""),
             groq_model=os.getenv("MINUTES_GROQ_MODEL", "openai/gpt-oss-120b"),
             groq_api_key=groq_key,
+            groq_rerank_model=os.getenv("MINUTES_GROQ_RERANK_MODEL", "openai/gpt-oss-20b"),
             sync_analysis=os.getenv("MINUTES_SYNC_ANALYSIS", "").lower() in {"1", "true", "yes"},
             retrieval=os.getenv("MINUTES_RETRIEVAL", "hybrid").lower(),
+            seed_samples=os.getenv("MINUTES_SEED_SAMPLES", "").lower() in {"1", "true", "yes"},
         )

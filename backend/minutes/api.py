@@ -10,12 +10,17 @@ from pathlib import Path
 
 from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import PlainTextResponse, StreamingResponse
+from fastapi.responses import PlainTextResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
 from . import __version__
+from .changes import what_changed
 from .config import Settings
-from .llm import LLM, build_llm
+from .exports import action_items_ics, follow_up
+from .live import live_router
+from .llm import LLM, build_llm, build_reranker
+from .retrieval import LSAEmbedder, Retriever
+from .schemas import MeetingAnalysis
 from .service import MeetingService, to_markdown
 from .store import Store
 from .transcribe import is_audio, transcribe
@@ -32,11 +37,36 @@ class AskRequest(BaseModel):
     meeting_id: str | None = None
 
 
+def seed_samples(service: MeetingService, settings: Settings, background=None) -> list[str]:
+    """Load the sample meetings. Saved analyses (real model output, see
+    scripts/precompute_samples.py) are used when present, so no model call is needed."""
+    store = service.store
+    ids = []
+    for path in sorted(SAMPLES_DIR.glob("*.vtt")):
+        meeting_id = service.ingest_text(path.read_text(), path.name)
+        saved = SAMPLES_DIR / "analyses" / f"{path.stem}.json"
+        if saved.exists():
+            store.set_analysis(meeting_id, MeetingAnalysis.model_validate_json(saved.read_text()))
+        elif settings.sync_analysis or background is None:
+            service.analyze(meeting_id)
+        else:
+            background.add_task(service.analyze, meeting_id)
+        ids.append(meeting_id)
+    return ids
+
+
 def create_app(settings: Settings | None = None, llm: LLM | None = None) -> FastAPI:
     settings = settings or Settings.from_env()
     store = Store(settings.db_path)
     llm = llm or build_llm(settings)
     service = MeetingService(store, llm, settings.chunk_words)
+    retriever = Retriever(
+        store, LSAEmbedder(), llm=build_reranker(settings, llm), mode=settings.retrieval
+    )
+    if settings.seed_samples and not store.list_meetings():
+        seed_samples(service, settings)
+    # "What changed" is one model call over every meeting; cache it until the meetings change.
+    changes_cache: dict[str, dict] = {}
 
     app = FastAPI(title="Minutes", version=__version__)
     app.add_middleware(
@@ -46,6 +76,14 @@ def create_app(settings: Settings | None = None, llm: LLM | None = None) -> Fast
         allow_headers=["*"],
     )
     app.state.service = service
+    app.state.retriever = retriever
+
+    def analyze_now_or_later(background: BackgroundTasks, meeting_id: str) -> None:
+        # Serverless hosts stop work once the response is sent, so analyze inside the request.
+        if settings.sync_analysis:
+            service.analyze(meeting_id)
+        else:
+            background.add_task(service.analyze, meeting_id)
 
     def require(meeting_id: str) -> dict:
         meeting = store.get_meeting(meeting_id)
@@ -55,7 +93,15 @@ def create_app(settings: Settings | None = None, llm: LLM | None = None) -> Fast
 
     @app.get("/api/health")
     def health() -> dict:
-        return {"status": "ok", "version": __version__, "model": llm.name}
+        return {
+            "status": "ok",
+            "version": __version__,
+            "model": llm.name,
+            "demo": bool(getattr(llm, "demo", False)),
+            "retrieval": settings.retrieval,
+            "live": bool(settings.groq_api_key),
+            "hosted_demo": settings.seed_samples,
+        }
 
     @app.get("/api/meetings")
     def list_meetings() -> list[dict]:
@@ -83,18 +129,13 @@ def create_app(settings: Settings | None = None, llm: LLM | None = None) -> Fast
                 meeting_id = service.ingest_text(text, filename, title)
         except TranscriptError as exc:
             raise HTTPException(422, str(exc)) from exc
-        background.add_task(service.analyze, meeting_id)
+        analyze_now_or_later(background, meeting_id)
         return require(meeting_id)
 
     @app.post("/api/samples", status_code=201)
     def load_samples(background: BackgroundTasks) -> list[dict]:
         """Load the bundled example meetings so the app can be tried in one click."""
-        loaded = []
-        for path in sorted(SAMPLES_DIR.glob("*.vtt")):
-            meeting_id = service.ingest_text(path.read_text(), path.name)
-            background.add_task(service.analyze, meeting_id)
-            loaded.append(require(meeting_id))
-        return loaded
+        return [require(i) for i in seed_samples(service, settings, background)]
 
     @app.get("/api/meetings/{meeting_id}")
     def get_meeting(meeting_id: str) -> dict:
@@ -111,8 +152,8 @@ def create_app(settings: Settings | None = None, llm: LLM | None = None) -> Fast
     def reanalyze(meeting_id: str, background: BackgroundTasks) -> dict:
         require(meeting_id)
         store.set_status(meeting_id, "processing")
-        background.add_task(service.analyze, meeting_id)
-        return {"status": "processing"}
+        analyze_now_or_later(background, meeting_id)
+        return {"status": require(meeting_id)["status"]}
 
     @app.get("/api/meetings/{meeting_id}/notes.md", response_class=PlainTextResponse)
     def export_notes(meeting_id: str) -> str:
@@ -140,7 +181,61 @@ def create_app(settings: Settings | None = None, llm: LLM | None = None) -> Fast
 
     @app.get("/api/search")
     def search(q: str, meeting_id: str | None = None, k: int = 10) -> list[dict]:
-        return [hit.__dict__ for hit in store.search(q, k=min(k, 50), meeting_id=meeting_id)]
+        hits = retriever.search(q, k=min(k, 50), meeting_id=meeting_id)
+        return [hit.__dict__ for hit in hits]
+
+    @app.get("/api/changes")
+    def changes() -> dict:
+        """Decisions tracked across meetings: what moved, what flipped, what held."""
+        ready = [m for m in store.list_meetings() if m["status"] == "ready"]
+        key = ",".join(
+            sorted(f"{m['id']}:{hash(json.dumps(m['analysis'], sort_keys=True))}" for m in ready)
+        )
+        if key not in changes_cache:
+            saved = SAMPLES_DIR / "analyses" / "_changes.json"
+            sample_names = sorted(p.name for p in SAMPLES_DIR.glob("*.vtt"))
+            if saved.exists() and sorted(m["source_name"] for m in ready) == sample_names:
+                changes_cache[key] = remap_saved_changes(json.loads(saved.read_text()), ready)
+            else:
+                try:
+                    changes_cache[key] = what_changed(store, llm)
+                except Exception as exc:  # noqa: BLE001 - shown in the UI
+                    raise HTTPException(
+                        502, f"Could not compare meetings: {str(exc)[:200]}"
+                    ) from exc
+        return changes_cache[key]
+
+    @app.get("/api/meetings/{meeting_id}/action-items.ics")
+    def meeting_ics(meeting_id: str) -> Response:
+        text, _, _ = action_items_ics([require(meeting_id)])
+        return Response(
+            text,
+            media_type="text/calendar",
+            headers={
+                "Content-Disposition": f'attachment; filename="action-items-{meeting_id}.ics"'
+            },
+        )
+
+    @app.get("/api/action-items.ics")
+    def all_ics() -> Response:
+        text, _, _ = action_items_ics(store.list_meetings())
+        return Response(
+            text,
+            media_type="text/calendar",
+            headers={"Content-Disposition": 'attachment; filename="action-items.ics"'},
+        )
+
+    @app.post("/api/meetings/{meeting_id}/follow-up")
+    def follow_up_email(meeting_id: str) -> dict:
+        meeting = require(meeting_id)
+        if not meeting.get("analysis"):
+            raise HTTPException(409, "The meeting has not been analyzed yet")
+        try:
+            return follow_up(meeting, llm).model_dump()
+        except Exception as exc:  # noqa: BLE001
+            raise HTTPException(502, f"Could not draft the email: {str(exc)[:200]}") from exc
+
+    app.include_router(live_router(service, llm, settings))
 
     @app.post("/api/ask")
     def ask(req: AskRequest) -> StreamingResponse:
@@ -150,7 +245,7 @@ def create_app(settings: Settings | None = None, llm: LLM | None = None) -> Fast
         """
         if req.meeting_id:
             require(req.meeting_id)
-        hits = store.search(req.question, k=settings.retrieval_k, meeting_id=req.meeting_id)
+        hits = retriever.search(req.question, k=settings.retrieval_k, meeting_id=req.meeting_id)
 
         def sse(event: str, data: object) -> str:
             return f"event: {event}\ndata: {json.dumps(data)}\n\n"
@@ -169,3 +264,15 @@ def create_app(settings: Settings | None = None, llm: LLM | None = None) -> Fast
         )
 
     return app
+
+
+def remap_saved_changes(saved: dict, ready: list[dict]) -> dict:
+    """Saved sample "what changed" output refers to meetings by file name; point it at this
+    database's meeting ids."""
+    by_source = {m["source_name"]: m for m in ready}
+    for thread in saved["threads"]:
+        for entry in thread["history"]:
+            m = by_source[entry.pop("source_name")]
+            entry["meeting_id"] = m["id"]
+            entry["meeting_title"] = m["title"]
+    return saved

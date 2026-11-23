@@ -1,0 +1,109 @@
+WEBVTT
+
+1
+00:00:02.000 --> 00:00:10.077
+<v Priya>Good morning, everyone. Let's dive into Q1 planning and make sure we lock down the remaining items for the Premium launch.</v>
+
+2
+00:00:10.677 --> 00:00:16.062
+<v Marcus>Sounds good. I’ll start with the sales side—what’s the latest on the launch timeline?</v>
+
+3
+00:00:16.662 --> 00:00:23.969
+<v Priya>We’re still aiming for the Premium launch on February 1st, but we need to confirm what features are included.</v>
+
+4
+00:00:24.569 --> 00:00:32.646
+<v Aisha>On the engineering side, the shared-budget feature is looking like a ten-week effort because of permissions handling and sync conflict resolution.</v>
+
+5
+00:00:33.246 --> 00:00:37.862
+<v Jordan>That means we can’t have shared budgets ready by February 1st, right?</v>
+
+6
+00:00:38.462 --> 00:00:42.308
+<v Priya>Correct. The estimate pushes the earliest feasible date to mid-April.</v>
+
+7
+00:00:42.908 --> 00:00:48.677
+<v Elena>We can adjust the design specs to reflect a Q2 release for shared budgets then.</v>
+
+8
+00:00:49.277 --> 00:00:55.431
+<v Marcus>Okay, so Premium will launch without shared budgets. We’ll need to update the sales deck accordingly.</v>
+
+9
+00:00:56.031 --> 00:01:01.415
+<v Priya>Yes, Marcus, please remove shared budgets from the February launch slide deck by Friday.</v>
+
+10
+00:01:02.015 --> 00:01:06.631
+<v Marcus>Got it, I’ll have that updated and sent out by EOD Friday.</v>
+
+11
+00:01:07.231 --> 00:01:19.538
+<v Aisha>Regarding the premium feature set, the push notifications for budget alerts are on track for a December 8th ship. The mobile team is now free, so we can replace the email-only alerts.</v>
+
+12
+00:01:20.138 --> 00:01:23.600
+<v Priya>Great, the weekly summary email stays as is, right?</v>
+
+13
+00:01:24.200 --> 00:01:28.046
+<v Jordan>Yes, the weekly summary email keeps going; push only replaces the budget alerts.</v>
+
+14
+00:01:28.646 --> 00:01:34.031
+<v Elena>I’ll tweak the onboarding flow to mention push notifications instead of just email alerts.</v>
+
+15
+00:01:34.631 --> 00:01:37.708
+<v Priya>Perfect. Any concerns about the push notification rollout?</v>
+
+16
+00:01:38.308 --> 00:01:44.077
+<v Aisha>No major blockers; we just need final QA by early December, which fits our timeline.</v>
+
+17
+00:01:44.677 --> 00:01:49.677
+<v Jordan>The categorizer is stable at 95 percent, so no changes there.</v>
+
+18
+00:01:50.277 --> 00:01:57.585
+<v Marcus>One question that’s come up with partners: does a single Premium subscription cover both people in a shared budget?</v>
+
+19
+00:01:58.185 --> 00:02:03.569
+<v Priya>The answer is yes—a single Premium subscription covers both partners in a shared budget.</v>
+
+20
+00:02:04.169 --> 00:02:06.669
+<v Marcus>That simplifies the sales pitch, thanks.</v>
+
+21
+00:02:07.269 --> 00:02:13.038
+<v Aisha>On staffing, we have approval for two more backend engineers. I’ll lead the interview process.</v>
+
+22
+00:02:13.638 --> 00:02:18.254
+<v Priya>Excellent. Let’s aim to have them onboard by the end of January.</v>
+
+23
+00:02:18.854 --> 00:02:23.085
+<v Elena>I’ll prepare a brief onboarding design guide for the new engineers.</v>
+
+24
+00:02:23.685 --> 00:02:28.300
+<v Jordan>I’ll document the current sync architecture so they have a clear handoff.</v>
+
+25
+00:02:28.900 --> 00:02:32.362
+<v Marcus>Anything else we need to lock in for Q1?</v>
+
+26
+00:02:32.962 --> 00:02:52.192
+<v Priya>Just to recap: push notifications ship December 8th, weekly email remains, shared budgets move to Q2 with a target of April 15th, Premium launches Feb 1 without shared budgets, one Premium covers both partners, two backend hires approved with Aisha interviewing, and Marcus will update the sales deck by Friday.</v>
+
+27
+00:02:52.792 --> 00:02:55.485
+<v Priya>Meeting adjourned. Have a great day, everyone.</v>

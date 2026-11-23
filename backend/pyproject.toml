@@ -11,11 +11,16 @@ dependencies = [
   "uvicorn[standard]>=0.30",
   "pydantic>=2.7",
   "python-multipart>=0.0.9",
+  "numpy>=2.0",
 ]
+
+[project.scripts]
+minutes-mcp = "minutes.mcp_server:main"
 
 [project.optional-dependencies]
 audio = ["faster-whisper>=1.0"]
-dev = ["pytest>=8", "respx>=0.21", "ruff>=0.6"]
+mcp = ["mcp>=2.0"]
+dev = ["pytest>=8", "respx>=0.21", "ruff>=0.6", "mcp>=2.0"]
 
 [build-system]
 requires = ["setuptools>=69"]
@@ -38,3 +43,7 @@ ignore = ["SIM905"]
 
 [tool.ruff.lint.flake8-bugbear]
 extend-immutable-calls = ["fastapi.File", "fastapi.Form"]
+
+[tool.ruff.lint.per-file-ignores]
+# The storyline the extra sample meetings were written from: long prose lines.
+"scripts/generate_samples.py" = ["E501"]

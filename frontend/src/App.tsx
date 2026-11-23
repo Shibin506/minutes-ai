@@ -1,24 +1,30 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api, type Meeting, type TimeRange } from "./api";
+import { api, type Health, type Meeting, type TimeRange } from "./api";
 import { ActionItems } from "./components/ActionItems";
 import { AskPanel } from "./components/AskPanel";
+import { LiveMeeting } from "./components/LiveMeeting";
 import { MeetingView } from "./components/MeetingView";
+import { WhatChanged } from "./components/WhatChanged";
 import { formatDuration } from "./format";
 
 type View =
-  { kind: "ask" } | { kind: "actions" } | { kind: "meeting"; id: string; seek: TimeRange | null };
+  | { kind: "ask" }
+  | { kind: "actions" }
+  | { kind: "changes" }
+  | { kind: "live" }
+  | { kind: "meeting"; id: string; seek: TimeRange | null };
 
 const SUGGESTIONS = [
   "Why did the launch date move?",
-  "What did we decide about notifications?",
+  "When will shared budgets ship, and why did it change?",
+  "What did we get from the bank-data vendor?",
   "What is Aisha working on?",
-  "How accurate is transaction categorization?",
 ];
 
 export default function App() {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [view, setView] = useState<View>({ kind: "ask" });
-  const [model, setModel] = useState("");
+  const [health, setHealth] = useState<Health | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   // Bumped whenever meeting data changes, so open views refetch.
@@ -34,10 +40,7 @@ export default function App() {
 
   useEffect(() => {
     void refresh().catch((e: Error) => setError(`Backend unreachable: ${e.message}`));
-    void api.health().then(
-      (h) => setModel(h.model),
-      () => undefined,
-    );
+    void api.health().then(setHealth, () => undefined);
   }, [refresh]);
 
   // Poll while any meeting is still being analyzed.
@@ -112,6 +115,18 @@ export default function App() {
           >
             Action items
           </button>
+          <button
+            className={view.kind === "changes" ? "nav active" : "nav"}
+            onClick={() => setView({ kind: "changes" })}
+          >
+            What changed
+          </button>
+          <button
+            className={view.kind === "live" ? "nav active" : "nav"}
+            onClick={() => setView({ kind: "live" })}
+          >
+            <span className="rec-dot small" /> Live meeting
+          </button>
         </nav>
         <h3>Meetings</h3>
         <ul className="meeting-list">
@@ -133,7 +148,19 @@ export default function App() {
             Load sample meetings
           </button>
         )}
-        {model && <p className="model muted small">Model: {model}</p>}
+        {health && (
+          <p className="model muted small">
+            Model: {health.model}
+            <br />
+            Search: {health.retrieval === "bm25" ? "keyword (BM25)" : "hybrid: BM25 + vectors"}
+            {health.retrieval.includes("rerank") ? " + LLM rerank" : ""}
+          </p>
+        )}
+        {health?.hosted_demo && (
+          <p className="demo-note small">
+            Live demo with fictional sample meetings. Uploads work but aren't kept: storage resets.
+          </p>
+        )}
       </aside>
 
       <main className="main">
@@ -161,6 +188,16 @@ export default function App() {
           </div>
         )}
         {view.kind === "actions" && <ActionItems version={version} onOpenSource={openSource} />}
+        {view.kind === "changes" && <WhatChanged version={version} onOpenSource={openSource} />}
+        {view.kind === "live" && (
+          <LiveMeeting
+            serverTranscription={!!health?.live}
+            onSaved={(m) => {
+              void refresh();
+              setView({ kind: "meeting", id: m.id, seek: null });
+            }}
+          />
+        )}
         {view.kind === "meeting" && (
           <MeetingView
             meetingId={view.id}

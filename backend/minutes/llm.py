@@ -46,7 +46,9 @@ class LLM(Protocol):
 
     def complete(self, system: str, user: str, max_tokens: int = 2000) -> str: ...
 
-    def complete_json(self, system: str, user: str, schema: type[T]) -> T: ...
+    def complete_json(
+        self, system: str, user: str, schema: type[T], light: bool = False, max_tokens: int = 3000
+    ) -> T: ...
 
 
 def clamp_segments(analysis: MeetingAnalysis, n_segments: int) -> MeetingAnalysis:
@@ -116,7 +118,9 @@ class ClaudeLLM:
         )
         return "".join(b.text for b in response.content if b.type == "text")
 
-    def complete_json(self, system: str, user: str, schema: type[T]) -> T:
+    def complete_json(
+        self, system: str, user: str, schema: type[T], light: bool = False, max_tokens: int = 3000
+    ) -> T:
         response = self.client.beta.messages.parse(
             model=self.model,
             max_tokens=8000,
@@ -142,6 +146,14 @@ RETRY_STATUSES = {429, 500, 502, 503}
 GEMINI_RETRY_STATUSES = RETRY_STATUSES
 RETRY_DELAYS = (2.0, 5.0, 10.0)
 GEMINI_RETRY_DELAYS = RETRY_DELAYS
+
+
+def _wait(r: httpx.Response, default: float) -> float:
+    """How long to back off: the provider's retry-after when it gives one (rate limits)."""
+    try:
+        return min(float(r.headers.get("retry-after", default)), 60.0)
+    except ValueError:
+        return default
 
 
 def _inline_refs(schema: dict) -> dict:
@@ -230,18 +242,31 @@ class OpenAICompatLLM:
         url = f"{self.base_url}/chat/completions"
         r = self.http.post(url, headers=self._headers(), json=body)
         for delay in self.retry_delays:
-            if r.status_code not in RETRY_STATUSES:
-                break
-            time.sleep(delay)
+            if r.status_code not in RETRY_STATUSES or self._quota_fallbacks(r):
+                break  # a daily limit won't clear by waiting: go straight to another model
+            time.sleep(_wait(r, delay))
             r = self.http.post(url, headers=self._headers(), json=body)
         if r.status_code in (400, 404) and self._fallback_model(r):
             body = {**body, "model": self.model}
             r = self.http.post(url, headers=self._headers(), json=body)
+        # Out of quota for a long time (a daily limit): try the provider's other models.
+        for model in self._quota_fallbacks(r):
+            r = self.http.post(url, headers=self._headers(), json={**body, "model": model})
+            if r.status_code != 429:
+                break
         return r
 
     def _fallback_model(self, r: httpx.Response) -> bool:
         """Override to switch to a current model when the configured one is retired."""
         return False
+
+    #: Other models to try when this one is out of quota (e.g. a free tier's daily token limit).
+    quota_fallbacks: tuple[str, ...] = ()
+
+    def _quota_fallbacks(self, r: httpx.Response) -> list[str]:
+        if r.status_code != 429 or _wait(r, 0) < 30 and "per day" not in r.text.lower():
+            return []
+        return [m for m in self.quota_fallbacks if m != self.model]
 
     def _content(self, r: httpx.Response, what: str) -> str:
         if r.status_code >= 400:
@@ -255,10 +280,21 @@ class OpenAICompatLLM:
     def provider(self) -> str:
         return type(self).__name__.removesuffix("LLM")
 
-    def _json(self, system: str, user: str, model: type[T], schema: dict, name: str) -> T:
+    def _json(
+        self,
+        system: str,
+        user: str,
+        model: type[T],
+        schema: dict,
+        name: str,
+        effort=None,
+        max_tokens: int = 3000,
+    ) -> T:
         body = self._body(
             system,
             user,
+            effort=effort,
+            max_tokens=max_tokens,
             response_format={
                 "type": "json_schema",
                 "json_schema": {"name": name, "strict": True, "schema": schema},
@@ -269,22 +305,39 @@ class OpenAICompatLLM:
     # -- the LLM protocol ---------------------------------------------------
 
     def analyze(self, title_hint: str, segments: list[Segment]) -> MeetingAnalysis:
-        analysis = self._json(
+        args = (
             prompts.ANALYSIS_SYSTEM,
             prompts.analysis_request(title_hint, segments),
             MeetingAnalysis,
             self.schema,
             "meeting_analysis",
         )
+        # Free tiers count the reserved output against a per-minute token budget, so reserve
+        # what an analysis needs, not the model's maximum.
+        try:
+            analysis = self._json(*args, max_tokens=6000)
+        except AnalysisError as exc:
+            if "length" not in str(exc):
+                raise
+            # Long reasoning ran out of room: try once more, thinking less.
+            analysis = self._json(*args, effort=self.light_effort or "low", max_tokens=6000)
         return clamp_segments(analysis, len(segments))
 
     def complete(self, system: str, user: str, max_tokens: int = 2000) -> str:
         body = self._body(system, user, effort=self.light_effort, max_tokens=max_tokens)
         return self._content(self._post(body), "reply").strip()
 
-    def complete_json(self, system: str, user: str, schema: type[T]) -> T:
+    def complete_json(
+        self, system: str, user: str, schema: type[T], light: bool = False, max_tokens: int = 3000
+    ) -> T:
         return self._json(
-            system, user, schema, json_schema_for(schema, self.strict_schema), schema.__name__
+            system,
+            user,
+            schema,
+            json_schema_for(schema, self.strict_schema),
+            schema.__name__,
+            effort=self.light_effort if light else None,
+            max_tokens=max_tokens,
         )
 
     #: Reasoning effort for short replies (answers, reranking, judging); None = provider default.
@@ -326,9 +379,11 @@ GROQ_PREFERRED = (r"gpt-oss-120b", r"qwen3", r"gpt-oss-20b", r"llama")
 
 class GroqLLM(OpenAICompatLLM):
     """Groq: open-weight models served very fast. Strict JSON schema for the analysis; if the
-    configured model has been retired, it switches to a current one from Groq's model list."""
+    configured model has been retired, it switches to a current one from Groq's model list,
+    and if it is out of daily quota, a request falls back to another model with its own quota."""
 
     base_url_default = GROQ_BASE_URL
+    quota_fallbacks = ("openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b")
     strict_schema = True
     light_effort = "low"
 
@@ -342,8 +397,16 @@ class GroqLLM(OpenAICompatLLM):
         super().__init__(model, api_key, reasoning_effort, **kw)
 
     def _fallback_model(self, r: httpx.Response) -> bool:
-        text = r.text.lower()
-        if not any(k in text for k in ("model", "decommission", "not found", "does not exist")):
+        try:
+            err = r.json().get("error", {})
+        except ValueError:
+            return False
+        code = str(err.get("code", "")).lower()
+        message = str(err.get("message", "")).lower()
+        retired = code in {"model_decommissioned", "model_not_found"} or any(
+            k in message for k in ("decommissioned", "does not exist", "model not found")
+        )
+        if not retired:
             return False
         try:
             listing = self.http.get(f"{self.base_url}/models", headers=self._headers())
@@ -404,7 +467,9 @@ class DemoLLM:
     def complete(self, system: str, user: str, max_tokens: int = 2000) -> str:
         raise NotImplementedError("demo mode has no language model")
 
-    def complete_json(self, system: str, user: str, schema: type[T]) -> T:
+    def complete_json(
+        self, system: str, user: str, schema: type[T], light: bool = False, max_tokens: int = 3000
+    ) -> T:
         raise NotImplementedError("demo mode has no language model")
 
     def analyze(self, title_hint: str, segments: list[Segment]) -> MeetingAnalysis:
@@ -465,6 +530,15 @@ class DemoLLM:
             lines = hit.text.splitlines()
             best = max(lines, key=lambda line: len(terms & set(re.findall(r"\w+", line.lower()))))
             yield f"- {best} [S{i}]\n"
+
+
+def build_reranker(settings, llm: LLM) -> LLM | None:
+    """A small, fast model for reranking (its own rate-limit bucket on Groq); else the main one."""
+    if getattr(llm, "demo", False):
+        return None
+    if settings.provider == "groq":
+        return GroqLLM(settings.groq_rerank_model, settings.groq_api_key, reasoning_effort="low")
+    return llm
 
 
 def build_llm(settings) -> LLM:

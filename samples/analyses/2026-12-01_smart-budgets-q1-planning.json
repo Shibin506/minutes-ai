@@ -1,0 +1,103 @@
+{
+ "title": "Smart Budgets Q1 Planning",
+ "summary": "The team confirmed the Premium product will launch on February 1 without the shared‑budget feature, which is now slated for a mid‑April Q2 release. Push notifications for budget alerts are on track to ship on December 8, replacing email‑only alerts while keeping the weekly summary email unchanged. A single Premium subscription will cover both partners in a shared budget, and two additional backend engineers have been approved with Aisha leading hiring. Action items include updating the sales deck, adjusting onboarding materials, and documenting architecture for the new hires.",
+ "key_points": [
+  "Premium launch set for February 1 without shared budgets",
+  "Shared‑budget feature moved to Q2 with target mid‑April",
+  "Push notifications for budget alerts ship December 8; weekly email remains",
+  "One Premium subscription covers both partners in a shared budget",
+  "Two backend engineers approved; Aisha to lead interviews and onboarding"
+ ],
+ "decisions": [
+  {
+   "decision": "Shared‑budget feature will be released in Q2, targeting mid‑April (around April 15)",
+   "segment": 5
+  },
+  {
+   "decision": "Premium will launch on February 1 without shared budgets",
+   "segment": 5
+  },
+  {
+   "decision": "Push notifications for budget alerts will ship December 8, replacing email‑only alerts; weekly summary email stays unchanged",
+   "segment": 10
+  },
+  {
+   "decision": "A single Premium subscription covers both partners in a shared budget",
+   "segment": 18
+  },
+  {
+   "decision": "Two additional backend engineers approved; aim to have them onboard by end of January",
+   "segment": 20
+  },
+  {
+   "decision": "Sales deck will be updated to remove shared budgets by Friday",
+   "segment": 8
+  }
+ ],
+ "action_items": [
+  {
+   "task": "Remove shared budgets from February launch slide deck",
+   "owner": "Marcus",
+   "due": "Friday",
+   "segment": 8
+  },
+  {
+   "task": "Update and send out the revised sales deck by end of day Friday",
+   "owner": "Marcus",
+   "due": "Friday",
+   "segment": 9
+  },
+  {
+   "task": "Tweak the onboarding flow to mention push notifications instead of email alerts",
+   "owner": "Elena",
+   "due": "",
+   "segment": 13
+  },
+  {
+   "task": "Lead interview process for two new backend engineers",
+   "owner": "Aisha",
+   "due": "",
+   "segment": 20
+  },
+  {
+   "task": "Prepare a brief onboarding design guide for the new engineers",
+   "owner": "Elena",
+   "due": "",
+   "segment": 22
+  },
+  {
+   "task": "Document the current sync architecture for handoff to new engineers",
+   "owner": "Jordan",
+   "due": "",
+   "segment": 23
+  }
+ ],
+ "open_questions": [],
+ "topics": [
+  {
+   "name": "Premium launch timeline and shared‑budget status",
+   "first_segment": 0,
+   "last_segment": 7
+  },
+  {
+   "name": "Push notification rollout and weekly email",
+   "first_segment": 10,
+   "last_segment": 14
+  },
+  {
+   "name": "Subscription coverage clarification",
+   "first_segment": 17,
+   "last_segment": 19
+  },
+  {
+   "name": "Backend hiring and onboarding preparations",
+   "first_segment": 20,
+   "last_segment": 23
+  },
+  {
+   "name": "Recap and final action items",
+   "first_segment": 24,
+   "last_segment": 25
+  }
+ ]
+}

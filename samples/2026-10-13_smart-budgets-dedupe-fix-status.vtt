@@ -1,0 +1,129 @@
+WEBVTT
+
+1
+00:00:02.000 --> 00:00:10.846
+<v Priya>Good morning, everyone. Let’s do a quick status check on the dedupe fix and see where we stand for the Oct 29 launch.</v>
+
+2
+00:00:11.446 --> 00:00:14.523
+<v Aisha>The dedupe-on-Plaid-transaction-ID fix is in review right now.</v>
+
+3
+00:00:15.123 --> 00:00:18.200
+<v Jordan>Great, thanks. Anything else on the backend side?</v>
+
+4
+00:00:18.800 --> 00:00:31.492
+<v Aisha>I ran a dry-run backfill and discovered a new edge case: Capital One pending transactions change their ID when they post, so we need to match on amount, date and merchant as well.</v>
+
+5
+00:00:32.092 --> 00:00:37.862
+<v Priya>Got it, so the logic needs to be broadened. How does that impact the timeline?</v>
+
+6
+00:00:38.462 --> 00:00:47.692
+<v Aisha>I’ve adjusted the estimate and now expect the fix to land on October 19th, which is actually a day earlier than we originally planned.</v>
+
+7
+00:00:48.292 --> 00:00:54.446
+<v Marcus>That’s good news for sales. We’ve already told 14 enterprise prospects about the Oct 29 date.</v>
+
+8
+00:00:55.046 --> 00:00:57.738
+<v Priya>Excellent outreach, Marcus. Any feedback from them?</v>
+
+9
+00:00:58.338 --> 00:01:06.800
+<v Marcus>Two of them asked for a demo the week of launch, so we’ll need to have the demo environment ready by then.</v>
+
+10
+00:01:07.400 --> 00:01:11.631
+<v Elena>I can prioritize the demo screens once the UI is locked.</v>
+
+11
+00:01:12.231 --> 00:01:17.615
+<v Jordan>On the communications front, the weekly summary email template is drafted and looks solid.</v>
+
+12
+00:01:18.215 --> 00:01:21.677
+<v Priya>What’s the metric we’re aiming for with that email?</v>
+
+13
+00:01:22.277 --> 00:01:26.508
+<v Jordan>We’re targeting a 40 percent open rate for the first batch.</v>
+
+14
+00:01:27.108 --> 00:01:33.262
+<v Aisha>The backfill for the dedupe fix is scheduled for the 21st, right after the code lands.</v>
+
+15
+00:01:33.862 --> 00:01:41.169
+<v Priya>So the sequence is code merge on the 19th, backfill on the 21st, and we’ll be good to go?</v>
+
+16
+00:01:41.769 --> 00:01:44.846
+<v Aisha>Exactly. Assuming the review passes without major comments.</v>
+
+17
+00:01:45.446 --> 00:01:50.446
+<v Elena>I’ll make sure the support FAQ about duplicate transactions is ready by Friday.</v>
+
+18
+00:01:51.046 --> 00:01:54.123
+<v Priya>Perfect, that ties into our launch communication plan.</v>
+
+19
+00:01:54.723 --> 00:02:00.877
+<v Marcus>Just a reminder, the enterprise prospects will be expecting the FAQ link in the onboarding flow.</v>
+
+20
+00:02:01.477 --> 00:02:05.708
+<v Jordan>Should we also note the FAQ in the weekly summary email?</v>
+
+21
+00:02:06.308 --> 00:02:09.769
+<v Priya>Yes, let’s include a brief note with a link.</v>
+
+22
+00:02:10.369 --> 00:02:14.600
+<v Elena>I can add that to the email copy before final approval.</v>
+
+23
+00:02:15.200 --> 00:02:23.662
+<v Aisha>One more thing – the dedupe fix also handles Chase and Wells Fargo tokens after refresh, so we’re covering the previous bug.</v>
+
+24
+00:02:24.262 --> 00:02:26.762
+<v Priya>Good, that clears the major blockers.</v>
+
+25
+00:02:27.362 --> 00:02:33.900
+<v Marcus>No new feature requests should go into this sprint; we need to freeze everything except launch blockers.</v>
+
+26
+00:02:34.500 --> 00:02:38.346
+<v Priya>Agreed, we’ll only merge items that are critical for launch.</v>
+
+27
+00:02:38.946 --> 00:02:43.946
+<v Jordan>I’ll hold off on any enhancements to the categorizer until after Oct 29.</v>
+
+28
+00:02:44.546 --> 00:02:47.623
+<v Elena>Same here, I’ll pause any non-essential design iterations.</v>
+
+29
+00:02:48.223 --> 00:02:54.377
+<v Aisha>I’ll keep the review open for any urgent feedback but aim to merge by the 19th.</v>
+
+30
+00:02:54.977 --> 00:02:57.477
+<v Priya>Anything else before we wrap up?</v>
+
+31
+00:02:58.077 --> 00:03:05.769
+<v Marcus>Just to confirm, the demo environment will be ready by the 27th so we can run those two prospect demos.</v>
+
+32
+00:03:06.369 --> 00:03:23.677
+<v Priya>Noted. Thanks, everyone. To recap: Aisha’s fix lands Oct 19, backfill on the 21st; weekly email drafted with a 40 % open target; we’re freezing new features; Elena will have the duplicate-transaction FAQ done by Friday. Let’s keep the momentum and hit the launch date.</v>

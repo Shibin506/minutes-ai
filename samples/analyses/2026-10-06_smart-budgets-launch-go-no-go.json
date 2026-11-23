@@ -1,0 +1,100 @@
+{
+ "title": "Smart Budgets Launch Go/No-Go",
+ "summary": "The team reviewed the upcoming Smart Budgets launch and identified a critical bank‑sync duplication bug affecting about 8% of accounts. The launch was postponed from October 15 to October 29 to allow Aisha to implement a deduplication fix and backfill data. Email‑only weekly summary notifications were approved for the launch, with Jordan owning the email implementation, and Plaid pricing was confirmed at $0.30 per account. The meeting concluded with a conditional go‑ahead for October 29, pending the fix delivery.",
+ "key_points": [
+  "Launch originally set for October 15 but a blocker was discovered",
+  "Bank‑sync duplicate transaction bug affects ~8% of connected accounts",
+  "Decision to move launch to October 29 to allow fix",
+  "Aisha will ship dedupe fix by Oct 20 and run backfill on Oct 21",
+  "Marcus will inform sales and update the customer‑facing launch date today",
+  "Categorization accuracy is 94% and onboarding is at 78% completion",
+  "Notification plan: email‑only weekly summaries for launch, push to follow in November",
+  "Jordan will own weekly summary email, template ready by Oct 24",
+  "Plaid pricing of $0.30 per account confirmed; Aisha will forward email to finance",
+  "Final go for Oct 29 conditional on dedupe fix landing by Oct 20"
+ ],
+ "decisions": [
+  {
+   "decision": "Launch date moved to October 29th",
+   "segment": 7
+  },
+  {
+   "decision": "Use email‑only weekly summaries for launch",
+   "segment": 15
+  },
+  {
+   "decision": "Plaid pricing of 30 cents per account confirmed",
+   "segment": 18
+  },
+  {
+   "decision": "Launch is a go for October 29th, conditional on dedupe fix landing by Oct 20",
+   "segment": 21
+  }
+ ],
+ "action_items": [
+  {
+   "task": "Ship dedupe fix for bank sync duplicate transactions",
+   "owner": "Aisha",
+   "due": "October 20th",
+   "segment": 9
+  },
+  {
+   "task": "Run backfill of existing data after dedupe fix",
+   "owner": "Aisha",
+   "due": "October 21st",
+   "segment": 9
+  },
+  {
+   "task": "Inform sales and update customer‑facing launch date",
+   "owner": "Marcus",
+   "due": "today",
+   "segment": 8
+  },
+  {
+   "task": "Create weekly summary email template and ready send job",
+   "owner": "Jordan",
+   "due": "October 24th",
+   "segment": 16
+  },
+  {
+   "task": "Forward Plaid pricing confirmation email to finance",
+   "owner": "Aisha",
+   "due": "",
+   "segment": 18
+  },
+  {
+   "task": "Provide status update on backfill on October 22nd",
+   "owner": "Aisha",
+   "due": "October 22nd",
+   "segment": 20
+  }
+ ],
+ "open_questions": [],
+ "topics": [
+  {
+   "name": "Launch timing and blocker",
+   "first_segment": 0,
+   "last_segment": 7
+  },
+  {
+   "name": "Feature status updates",
+   "first_segment": 8,
+   "last_segment": 11
+  },
+  {
+   "name": "Notification plan",
+   "first_segment": 12,
+   "last_segment": 15
+  },
+  {
+   "name": "Plaid pricing confirmation",
+   "first_segment": 16,
+   "last_segment": 18
+  },
+  {
+   "name": "Final go decision and next steps",
+   "first_segment": 19,
+   "last_segment": 21
+  }
+ ]
+}

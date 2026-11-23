@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { api, type TimeRange, type TrackedActionItem } from "../api";
 import { formatTime } from "../format";
+import { githubIssueUrl, linearIssueUrl, savedRepo } from "../issues";
 
 interface Props {
   version: number;
@@ -27,12 +28,17 @@ export function ActionItems({ version, onOpenSource }: Props) {
             Every commitment from every meeting, linked to the moment it was made.
           </p>
         </div>
-        <select value={owner} onChange={(e) => setOwner(e.target.value)} aria-label="Owner">
-          <option value="everyone">Everyone</option>
-          {owners.map((o) => (
-            <option key={o}>{o}</option>
-          ))}
-        </select>
+        <div className="actions">
+          <a className="button secondary" href={api.allIcsUrl()} download data-testid="all-ics">
+            Download calendar (.ics)
+          </a>
+          <select value={owner} onChange={(e) => setOwner(e.target.value)} aria-label="Owner">
+            <option value="everyone">Everyone</option>
+            {owners.map((o) => (
+              <option key={o}>{o}</option>
+            ))}
+          </select>
+        </div>
       </header>
       {items === null ? (
         <p className="muted">Loading…</p>
@@ -47,6 +53,7 @@ export function ActionItems({ version, onOpenSource }: Props) {
                 <th>Task</th>
                 <th>Due</th>
                 <th>Meeting</th>
+                <th>Issue</th>
               </tr>
             </thead>
             <tbody>
@@ -64,6 +71,26 @@ export function ActionItems({ version, onOpenSource }: Props) {
                     >
                       {item.meeting} · {formatTime(item.start)}
                     </button>
+                  </td>
+                  <td className="issue-cell">
+                    {githubIssueUrl(savedRepo(), item) && (
+                      <a
+                        className="issue-link"
+                        href={githubIssueUrl(savedRepo(), item)!}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        GitHub
+                      </a>
+                    )}
+                    <a
+                      className="issue-link"
+                      href={linearIssueUrl(item)}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Linear
+                    </a>
                   </td>
                 </tr>
               ))}

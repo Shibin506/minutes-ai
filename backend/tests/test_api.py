@@ -90,7 +90,7 @@ def test_failed_analysis_keeps_transcript_searchable(tmp_path):
 
 def test_samples_action_items_and_ask(client):
     loaded = client.post("/api/samples").json()
-    assert len(loaded) == 3
+    assert len(loaded) == 10
     assert {m["status"] for m in client.get("/api/meetings").json()} == {"ready"}
 
     items = client.get("/api/action-items").json()
@@ -132,3 +132,58 @@ def test_reanalyze(tmp_path):
     client.app.state.service.llm = DemoLLM()
     assert client.post(f"/api/meetings/{meeting_id}/analyze").status_code == 202
     assert client.get(f"/api/meetings/{meeting_id}").json()["status"] == "ready"
+
+
+def test_what_changed_follows_decisions_across_meetings(client):
+    client.post("/api/samples")
+    out = client.get("/api/changes").json()
+    assert out["meetings"] == 10 and out["threads"]
+    for thread in out["threads"]:
+        assert thread["status"] in {"changed", "reversed", "consistent"}
+        assert len({e["meeting_id"] for e in thread["history"]}) >= 2
+        dates = [e["date"] for e in thread["history"]]
+        assert dates == sorted(dates)
+    assert client.get("/api/changes").json() == out  # cached until meetings change
+
+
+def test_calendar_and_follow_up_exports(client):
+    loaded = client.post("/api/samples").json()
+    go = next(m for m in loaded if m["source_name"].startswith("2026-10-06"))
+    res = client.get(f"/api/meetings/{go['id']}/action-items.ics")
+    assert res.headers["content-type"].startswith("text/calendar")
+    assert "BEGIN:VEVENT" in res.text and "DTSTART;VALUE=DATE:2026" in res.text
+    assert client.get("/api/action-items.ics").text.count("BEGIN:VEVENT") > res.text.count(
+        "BEGIN:VEVENT"
+    )
+    email = client.post(f"/api/meetings/{go['id']}/follow-up").json()
+    assert email["subject"] and "Action items" in email["body"]
+
+
+def test_live_meeting_notes_and_save(client):
+    segs = [
+        {
+            "speaker": "Room",
+            "start": 0,
+            "end": 3,
+            "text": "We decided to cut the signup form to three fields.",
+        },
+        {"speaker": "Room", "start": 3, "end": 6, "text": "I'll send the new mockups by Thursday."},
+    ]
+    notes = client.post(
+        "/api/live/notes", json={"title": "Onboarding sync", "segments": segs}
+    ).json()
+    assert notes["action_items"] and notes["decisions"]
+    saved = client.post("/api/live/save", json={"title": "Onboarding sync", "segments": segs})
+    assert saved.status_code == 201
+    assert client.get(f"/api/meetings/{saved.json()['id']}").json()["status"] == "ready"
+    assert client.post("/api/live/notes", json={"segments": []}).status_code == 422
+    # Server-side transcription needs a Groq key; the browser falls back to its own recognition.
+    assert (
+        client.post("/api/live/transcribe", files={"file": ("a.webm", b"x" * 2000)}).status_code
+        == 501
+    )
+
+
+def test_health_reports_features(client):
+    h = client.get("/api/health").json()
+    assert h["demo"] is True and h["retrieval"] == "hybrid" and h["live"] is False

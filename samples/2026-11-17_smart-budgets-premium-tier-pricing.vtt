@@ -1,0 +1,157 @@
+WEBVTT
+
+1
+00:00:02.000 --> 00:00:07.385
+<v Priya>Good morning, everyone. Let’s dive into the Premium tier and pricing for Smart Budgets.</v>
+
+2
+00:00:07.985 --> 00:00:14.138
+<v Marcus>I’ll start with the market side—most competitors are sitting at $5.99 per month for comparable features.</v>
+
+3
+00:00:14.738 --> 00:00:19.354
+<v Elena>Our proposed Premium includes shared budgets, custom categories, and CSV export, right?</v>
+
+4
+00:00:19.954 --> 00:00:28.031
+<v Jordan>Yes, and the custom categories will require the categorizer to learn per-user rules, which I estimate will take about three weeks.</v>
+
+5
+00:00:28.631 --> 00:00:35.938
+<v Aisha>From the backend perspective, shared budgets will add some extra sync complexity but nothing we can’t handle before February.</v>
+
+6
+00:00:36.538 --> 00:00:41.154
+<v Priya>Thanks. Marcus, can you walk us through the pricing options you’ve seen?</v>
+
+7
+00:00:41.754 --> 00:00:51.369
+<v Marcus>Sure. We have two main numbers on the table: $3.99 or $4.99 per month. $3.99 undercuts the competition but might leave money on the table.</v>
+
+8
+00:00:51.969 --> 00:00:58.123
+<v Elena>Design-wise, the $4.99 feels more premium and aligns with the added CSV export UI we built.</v>
+
+9
+00:00:58.723 --> 00:01:04.492
+<v Jordan>From a value standpoint, the custom categories are a big differentiator, so $4.99 seems justified.</v>
+
+10
+00:01:05.092 --> 00:01:12.785
+<v Aisha>Also, the additional data storage for CSV exports will increase our cost marginally, so we should price to cover that.</v>
+
+11
+00:01:13.385 --> 00:01:15.885
+<v Priya>What about the annual option?</v>
+
+12
+00:01:16.485 --> 00:01:23.408
+<v Marcus>We could do $49 per year, which is effectively a two-month discount, and that’s standard in the industry.</v>
+
+13
+00:01:24.008 --> 00:01:29.008
+<v Elena>That price point also makes it easier to market a “save $10” message.</v>
+
+14
+00:01:29.608 --> 00:01:38.454
+<v Jordan>If we go annual, we need to make sure the custom categories feature is fully stable before the first yearly cohort signs up.</v>
+
+15
+00:01:39.054 --> 00:01:41.746
+<v Priya>Understood. Any concerns about the $4.99 number?</v>
+
+16
+00:01:42.346 --> 00:01:48.500
+<v Marcus>Only that we’re a little below the $5.99 competitor, but I think the feature set compensates.</v>
+
+17
+00:01:49.100 --> 00:01:53.331
+<v Aisha>No technical blockers that would force us to raise the price.</v>
+
+18
+00:01:53.931 --> 00:02:00.469
+<v Elena>From a design perspective, the $4.99 tier fits the visual hierarchy we’ve created for the pricing page.</v>
+
+19
+00:02:01.069 --> 00:02:04.531
+<v Priya>So we’re leaning toward $4.99/month or $49/year. Any objections?</v>
+
+20
+00:02:05.131 --> 00:02:08.208
+<v Marcus>No objections. I’ll update the sales deck accordingly.</v>
+
+21
+00:02:08.808 --> 00:02:14.962
+<v Jordan>I’ll start the three-week plan for per-user rule learning right after this meeting.</v>
+
+22
+00:02:15.562 --> 00:02:22.869
+<v Aisha>I’ll coordinate with Jordan to make sure the backend endpoints for custom categories are ready by the February launch.</v>
+
+23
+00:02:23.469 --> 00:02:29.623
+<v Elena>I’ll finalize the premium UI copy and make sure the CSV export button is clearly visible.</v>
+
+24
+00:02:30.223 --> 00:02:32.915
+<v Priya>Great. Let’s lock in the launch date.</v>
+
+25
+00:02:33.515 --> 00:02:38.900
+<v Marcus>February 1st works for me; we can start promoting the tier in late January.</v>
+
+26
+00:02:39.500 --> 00:02:44.885
+<v Jordan>That gives us enough time to finish the categorizer learning module before the launch.</v>
+
+27
+00:02:45.485 --> 00:02:49.715
+<v Aisha>I’ll have the shared-budget sync tested by mid-January, so we’re good.</v>
+
+28
+00:02:50.315 --> 00:02:55.315
+<v Elena>I’ll have the design assets ready for the marketing team by Jan 20.</v>
+
+29
+00:02:55.915 --> 00:03:02.838
+<v Priya>One open question: do couples on shared budgets each need a Premium subscription, or does one cover both?</v>
+
+30
+00:03:03.438 --> 00:03:08.054
+<v Marcus>That’s a key sales question; we should decide before we go live.</v>
+
+31
+00:03:08.654 --> 00:03:12.500
+<v Jordan>It also impacts how we allocate the per-user learning resources.</v>
+
+32
+00:03:13.100 --> 00:03:19.638
+<v Aisha>Technically we can tie both accounts to a single premium flag, but we need a policy decision.</v>
+
+33
+00:03:20.238 --> 00:03:27.546
+<v Elena>From a UX side, we can show a “share with partner” toggle, but the pricing model must be clear.</v>
+
+34
+00:03:28.146 --> 00:03:33.915
+<v Priya>Let’s table that for next meeting and come back with data from the sales team.</v>
+
+35
+00:03:34.515 --> 00:03:37.977
+<v Marcus>Agreed. I’ll gather competitor bundle pricing and user feedback.</v>
+
+36
+00:03:38.577 --> 00:03:42.423
+<v Jordan>I’ll prepare a quick impact analysis on the categorizer load.</v>
+
+37
+00:03:43.023 --> 00:03:46.485
+<v Aisha>I’ll draft the backend flag logic for shared-premium accounts.</v>
+
+38
+00:03:47.085 --> 00:03:49.777
+<v Elena>I’ll prototype the partner-share UI for review.</v>
+
+39
+00:03:50.377 --> 00:04:01.531
+<v Priya>Perfect. To recap: Premium at $4.99/month or $49/year, launching Feb 1, custom categories need three weeks of work, and we’ll decide the shared-budget subscription model next time. Thanks, everyone.</v>

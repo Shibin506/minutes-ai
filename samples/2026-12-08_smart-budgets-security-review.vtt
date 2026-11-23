@@ -1,0 +1,121 @@
+WEBVTT
+
+1
+00:00:02.000 --> 00:00:12.769
+<v Priya>Good morning, everyone. Let’s dive into the security and compliance review for Smart Budgets. We’ll cover token storage, audit timelines, pen testing, data handling, and any open questions.</v>
+
+2
+00:00:13.369 --> 00:00:21.062
+<v Marcus>I’m mostly concerned about the impact on our partners if we change token storage; will that affect our integration timeline?</v>
+
+3
+00:00:21.662 --> 00:00:37.815
+<v Aisha>The tokens are currently encrypted at rest with an app-level key. We’ve decided to move them to a cloud KMS and set up automatic key rotation every 90 days. I’ll own that work and aim to have it done by January 15th.</v>
+
+4
+00:00:38.415 --> 00:00:47.646
+<v Jordan>Just a quick note—our categorizer prompts never include account numbers, only merchant names and amounts, so we’re not exposing any sensitive account identifiers there.</v>
+
+5
+00:00:48.246 --> 00:00:55.554
+<v Elena>That’s good for UI safety. Does the new KMS affect how we fetch Plaid data for the onboarding flow?</v>
+
+6
+00:00:56.154 --> 00:01:03.846
+<v Aisha>No, the API calls stay the same; the only change is the storage layer, so the onboarding flow remains untouched.</v>
+
+7
+00:01:04.446 --> 00:01:07.523
+<v Marcus>Great. On the audit side, what’s the timeline?</v>
+
+8
+00:01:08.123 --> 00:01:15.815
+<v Priya>We’re targeting a SOC 2 Type I audit completion by March 31st, and we’ve selected Prescient Assurance as the auditor.</v>
+
+9
+00:01:16.415 --> 00:01:21.031
+<v Jordan>Do we need any additional controls for the categorizer before the audit?</v>
+
+10
+00:01:21.631 --> 00:01:30.092
+<v Aisha>As long as the token handling is compliant, the categorizer data is already masked per our policy, so we should be fine.</v>
+
+11
+00:01:30.692 --> 00:01:39.538
+<v Elena>Speaking of data, we need to decide how long to keep raw transaction data after a user disconnects an account. Legal, any guidance?</v>
+
+12
+00:01:40.138 --> 00:01:43.985
+<v Priya>That’s our open question—legal, can you advise on retention periods?</v>
+
+13
+00:01:44.585 --> 00:01:48.815
+<v Marcus>Also, will the retention policy affect our partnership agreements with Plaid?</v>
+
+14
+00:01:49.415 --> 00:01:54.800
+<v Aisha>It could, if we delete data too quickly and they need it for support.</v>
+
+15
+00:01:55.400 --> 00:02:03.477
+<v Jordan>From a ML perspective, keeping a short window—maybe 30 days—still gives us enough data for model updates without retaining unnecessary PII.</v>
+
+16
+00:02:04.077 --> 00:02:11.000
+<v Elena>I can adjust the UI to inform users about the retention period once we have a final number.</v>
+
+17
+00:02:11.600 --> 00:02:14.292
+<v Priya>Thanks. Next, the penetration test—what’s the plan?</v>
+
+18
+00:02:14.892 --> 00:02:17.969
+<v Marcus>We need it before the Premium launch, right?</v>
+
+19
+00:02:18.569 --> 00:02:23.954
+<v Aisha>Yes, we’ve booked Cobalt for the pen test during the week of January 12th.</v>
+
+20
+00:02:24.554 --> 00:02:29.169
+<v Jordan>That aligns with our timeline; we’ll have the categorizer stable by then.</v>
+
+21
+00:02:29.769 --> 00:02:34.769
+<v Elena>I’ll make sure any UI changes are documented for the pen test scope.</v>
+
+22
+00:02:35.369 --> 00:02:37.869
+<v Priya>Perfect. Anything else on compliance?</v>
+
+23
+00:02:38.469 --> 00:02:47.700
+<v Marcus>One more thing: push notifications shipped this morning. Any compliance concerns there?</v>
+
+24
+00:02:48.300 --> 00:02:54.069
+<v Aisha>No. Push payloads only contain the budget name and the percentage used, never amounts or merchants.</v>
+
+25
+00:02:54.669 --> 00:03:01.208
+<v Jordan>And the weekly summary email follows the same rule, so we are consistent.</v>
+
+26
+00:03:01.808 --> 00:03:19.500
+<v Priya>Great. To recap: Aisha will migrate Plaid tokens to a cloud KMS by Jan 15, SOC 2 Type I audit with Prescient Assurance by Mar 31, Cobalt pen test the week of Jan 12, and we need legal’s input on raw transaction retention. Any final thoughts?</v>
+
+27
+00:03:20.100 --> 00:03:22.600
+<v Elena>Nothing from me.</v>
+
+28
+00:03:23.200 --> 00:03:25.700
+<v Marcus>All set on my end.</v>
+
+29
+00:03:26.300 --> 00:03:28.800
+<v Jordan>Good to go.</v>
+
+30
+00:03:29.400 --> 00:03:37.092
+<v Priya>Thanks, everyone. Let’s reconvene next week with legal’s recommendation and any updates on the KMS migration. Have a productive day.</v>

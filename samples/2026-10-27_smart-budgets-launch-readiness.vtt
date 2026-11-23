@@ -1,0 +1,125 @@
+WEBVTT
+
+1
+00:00:02.000 --> 00:00:10.462
+<v Priya>Good morning, everyone. Let’s run through the final launch readiness checklist for Smart Budgets, targeting Wednesday, October 29th at 9 am Pacific.</v>
+
+2
+00:00:11.062 --> 00:00:19.523
+<v Marcus>The support team completed their training yesterday, and we’ve set up a status page that will go live the moment we launch.</v>
+
+3
+00:00:20.123 --> 00:00:29.354
+<v Aisha>The dedupe fix shipped on October 19th; we backfilled and corrected 41,000 duplicate transactions, and we’ve seen zero duplicates in the last five days.</v>
+
+4
+00:00:29.954 --> 00:00:37.646
+<v Jordan>Our categorizer is now hitting 95 percent accuracy on production traffic, which is a solid improvement over the rule-based baseline.</v>
+
+5
+00:00:38.246 --> 00:00:46.323
+<v Elena>The onboarding flow looks good on the latest build; I’ll have the final assets ready for the launch splash by tomorrow.</v>
+
+6
+00:00:46.923 --> 00:00:53.846
+<v Priya>Great. Any blockers on the Plaid integration? We know we have a rate-limit risk with the launch spike.</v>
+
+7
+00:00:54.446 --> 00:01:02.138
+<v Aisha>I’ve identified that risk and I’ll add a queue with exponential backoff to throttle the calls during the initial surge.</v>
+
+8
+00:01:02.738 --> 00:01:10.046
+<v Marcus>That should keep our partners happy. Also, the status page will display any Plaid throttling alerts in real time.</v>
+
+9
+00:01:10.646 --> 00:01:18.338
+<v Jordan>I’ll set up alerts on the categorization error dashboards and monitor them closely for the first 48 hours after launch.</v>
+
+10
+00:01:18.938 --> 00:01:26.631
+<v Priya>Perfect. So the decision is to go ahead with launch on Wednesday, October 29th at 9 am Pacific. Everyone clear?</v>
+
+11
+00:01:27.231 --> 00:01:31.077
+<v Priya>Marcus, can you confirm the support handoff documentation is uploaded?</v>
+
+12
+00:01:31.677 --> 00:01:39.369
+<v Marcus>It’s in the shared drive under “Smart Budgets – Support Docs” and I’ve pinged the team to review it today.</v>
+
+13
+00:01:39.969 --> 00:01:42.662
+<v Priya>Aisha, the backfill script—any lingering performance concerns?</v>
+
+14
+00:01:43.262 --> 00:01:49.800
+<v Aisha>No, the script ran overnight and the DB load stayed under 30 % of capacity. We’re good.</v>
+
+15
+00:01:50.400 --> 00:01:54.631
+<v Priya>Jordan, will the email-only weekly summary be ready for the launch?</v>
+
+16
+00:01:55.231 --> 00:02:03.308
+<v Jordan>The email template is locked, and the scheduler will start sending on launch day. No push notifications until November as planned.</v>
+
+17
+00:02:03.908 --> 00:02:06.408
+<v Priya>Elena, any last UI tweaks needed?</v>
+
+18
+00:02:07.008 --> 00:02:13.546
+<v Elena>Only minor copy changes on the “Set Your Goal” screen; I’ll push those in the next commit.</v>
+
+19
+00:02:14.146 --> 00:02:18.762
+<v Priya>Marcus, the status page URL—has it been added to the release notes?</v>
+
+20
+00:02:19.362 --> 00:02:23.977
+<v Marcus>Yes, it’s in the notes and linked from the launch announcement draft.</v>
+
+21
+00:02:24.577 --> 00:02:29.577
+<v Priya>Aisha, regarding the queue, do we have metrics to validate the backoff timing?</v>
+
+22
+00:02:30.177 --> 00:02:38.254
+<v Aisha>I ran a load test simulating 5 k requests per minute; the exponential backoff kept the success rate above 99 %.</v>
+
+23
+00:02:38.854 --> 00:02:44.623
+<v Priya>Jordan, after the first 48 hours, will you hand over monitoring to the ops team?</v>
+
+24
+00:02:45.223 --> 00:02:52.531
+<v Jordan>I’ll transition the dashboards to ops on day three, but I’ll stay on call for the first 24 hours.</v>
+
+25
+00:02:53.131 --> 00:02:59.669
+<v Priya>Good. Let’s recap actions: I’ll post the launch announcement in the company all-hands channel on the 29th.</v>
+
+26
+00:03:00.269 --> 00:03:04.500
+<v Jordan>I’ll watch the categorization error dashboards for the first 48 hours.</v>
+
+27
+00:03:05.100 --> 00:03:07.600
+<v Priya>Anything else before we wrap?</v>
+
+28
+00:03:08.200 --> 00:03:10.700
+<v Elena>No, I’m set.</v>
+
+29
+00:03:11.300 --> 00:03:13.800
+<v Marcus>All clear from my side.</v>
+
+30
+00:03:14.400 --> 00:03:16.900
+<v Aisha>Nothing pending.</v>
+
+31
+00:03:17.500 --> 00:03:26.731
+<v Priya>Thanks, everyone. We’re on track for a smooth launch on October 29th at 9 am Pacific. Let’s reconvene tomorrow for the final smoke test.</v>

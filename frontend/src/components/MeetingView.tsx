@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { api, type MeetingDetail, type TimeRange } from "../api";
+import { api, type FollowUp, type MeetingDetail, type TimeRange } from "../api";
 import { formatDuration, formatTime } from "../format";
+import { githubIssueUrl, linearIssueUrl, savedRepo, saveRepo } from "../issues";
 import { AskPanel } from "./AskPanel";
 
 interface Props {
@@ -17,6 +18,10 @@ export function MeetingView({ meetingId, seek, version, onOpenSource, onDeleted 
   // Highlighted transcript segments, as an inclusive [first, last] index range.
   const [active, setActive] = useState<[number, number] | null>(null);
   const transcript = useRef<HTMLOListElement>(null);
+  const [email, setEmail] = useState<FollowUp | "loading" | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [repo, setRepo] = useState(savedRepo);
 
   useEffect(() => {
     api.meeting(meetingId).then(setMeeting, (e: Error) => setError(e.message));
@@ -62,6 +67,28 @@ export function MeetingView({ meetingId, seek, version, onOpenSource, onDeleted 
           <a className="button secondary" href={api.notesUrl(meeting.id)} target="_blank">
             Export notes
           </a>
+          {a && a.action_items.some((x) => x.due) && (
+            <a className="button secondary" href={api.icsUrl(meeting.id)} download>
+              Add due dates to calendar
+            </a>
+          )}
+          {a && (
+            <button
+              className="secondary"
+              data-testid="follow-up"
+              disabled={email === "loading"}
+              onClick={() => {
+                setEmailError(null);
+                setEmail("loading");
+                api.followUp(meeting.id).then(setEmail, (e: Error) => {
+                  setEmail(null);
+                  setEmailError(e.message);
+                });
+              }}
+            >
+              {email === "loading" ? "Drafting…" : "Draft follow-up email"}
+            </button>
+          )}
           <button
             className="secondary"
             onClick={() =>
@@ -90,6 +117,39 @@ export function MeetingView({ meetingId, seek, version, onOpenSource, onDeleted 
               Analysis failed: {meeting.error}. The transcript is still searchable.
             </p>
           )}
+          {emailError && <p className="banner error">{emailError}</p>}
+          {email && email !== "loading" && (
+            <section className="email-draft" data-testid="email-draft">
+              <div className="email-head">
+                <h2>Follow-up email</h2>
+                <button className="link small" onClick={() => setEmail(null)}>
+                  Close
+                </button>
+              </div>
+              <p className="email-subject">
+                <span className="muted">Subject:</span> {email.subject}
+              </p>
+              <pre className="email-body">{email.body}</pre>
+              <div className="actions">
+                <button
+                  className="secondary"
+                  onClick={() =>
+                    void navigator.clipboard
+                      ?.writeText(`Subject: ${email.subject}\n\n${email.body}`)
+                      .then(() => setCopied(true))
+                  }
+                >
+                  {copied ? "Copied" : "Copy"}
+                </button>
+                <a
+                  className="button secondary"
+                  href={`mailto:?subject=${encodeURIComponent(email.subject)}&body=${encodeURIComponent(email.body)}`}
+                >
+                  Open in email app
+                </a>
+              </div>
+            </section>
+          )}
           {a && (
             <>
               <section>
@@ -98,18 +158,55 @@ export function MeetingView({ meetingId, seek, version, onOpenSource, onDeleted 
               </section>
               {a.action_items.length > 0 && (
                 <section>
-                  <h2>Action items</h2>
+                  <div className="section-head">
+                    <h2>Action items</h2>
+                    <label className="repo muted small">
+                      GitHub repo for issues
+                      <input
+                        placeholder="owner/repo"
+                        value={repo}
+                        onChange={(e) => {
+                          setRepo(e.target.value);
+                          saveRepo(e.target.value);
+                        }}
+                      />
+                    </label>
+                  </div>
                   <ul className="items">
-                    {a.action_items.map((item, i) => (
-                      <li key={i}>
-                        <span className="owner">{item.owner}</span>
-                        <span>{item.task}</span>
-                        <span className="meta">
-                          {item.due && <span className="due">due {item.due}</span>}
-                          {at(item.segment)}
-                        </span>
-                      </li>
-                    ))}
+                    {a.action_items.map((item, i) => {
+                      const src = { ...item, meeting: meeting.title };
+                      const gh = githubIssueUrl(repo, src);
+                      return (
+                        <li key={i}>
+                          <span className="owner">{item.owner}</span>
+                          <span>{item.task}</span>
+                          <span className="meta">
+                            {item.due && <span className="due">due {item.due}</span>}
+                            {at(item.segment)}
+                            {gh && (
+                              <a
+                                className="issue-link"
+                                href={gh}
+                                target="_blank"
+                                rel="noreferrer"
+                                title="Create a GitHub issue"
+                              >
+                                GitHub
+                              </a>
+                            )}
+                            <a
+                              className="issue-link"
+                              href={linearIssueUrl(src)}
+                              target="_blank"
+                              rel="noreferrer"
+                              title="Create a Linear issue"
+                            >
+                              Linear
+                            </a>
+                          </span>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </section>
               )}

@@ -1,0 +1,115 @@
+{
+ "title": "Smart Budgets Premium Tier Pricing & Launch",
+ "summary": "The team decided to price the Smart Budgets Premium tier at $4.99 per month or $49 per year and target a launch on February 1. Features include shared budgets, custom categories with a three‑week learning phase, and CSV export, with design and backend work scheduled through January. Action items were assigned to update the sales deck, finalize UI copy, prepare backend endpoints, and test syncs, while the question of how to bill couples on shared budgets will be revisited in the next meeting.",
+ "key_points": [
+  "Competitor pricing is $5.99/month; Premium tier set at $4.99/month or $49/year.",
+  "Premium features: shared budgets, custom categories (three‑week per‑user rule learning), CSV export.",
+  "Backend adds sync complexity for shared budgets but is manageable before February; CSV export adds marginal storage cost.",
+  "Launch planned for February 1 with promotion starting late January.",
+  "Design tasks: finalize UI copy, ensure CSV export button visibility, deliver design assets by Jan 20.",
+  "Technical tasks: backend endpoints for custom categories ready by February launch, shared‑budget sync tested by mid‑January, categorizer learning plan initiated.",
+  "Open question on whether a shared‑budget couple needs one or two Premium subscriptions; to be decided next meeting.",
+  "Action items assigned across sales, design, and engineering to support launch."
+ ],
+ "decisions": [
+  {
+   "decision": "Premium pricing set at $4.99 per month and $49 per year",
+   "segment": 18
+  },
+  {
+   "decision": "Launch date set to February 1st",
+   "segment": 24
+  },
+  {
+   "decision": "Shared‑budget subscription model will be tabled for next meeting",
+   "segment": 33
+  }
+ ],
+ "action_items": [
+  {
+   "task": "Update the sales deck with the new pricing",
+   "owner": "Marcus",
+   "due": "",
+   "segment": 19
+  },
+  {
+   "task": "Start the three‑week plan for per‑user rule learning for custom categories",
+   "owner": "Jordan",
+   "due": "",
+   "segment": 20
+  },
+  {
+   "task": "Coordinate with Jordan to ensure backend endpoints for custom categories are ready by the February launch",
+   "owner": "Aisha",
+   "due": "February",
+   "segment": 21
+  },
+  {
+   "task": "Finalize premium UI copy and ensure the CSV export button is clearly visible",
+   "owner": "Elena",
+   "due": "",
+   "segment": 22
+  },
+  {
+   "task": "Test shared‑budget sync by mid‑January",
+   "owner": "Aisha",
+   "due": "mid-January",
+   "segment": 26
+  },
+  {
+   "task": "Deliver design assets for the marketing team by Jan 20",
+   "owner": "Elena",
+   "due": "Jan 20",
+   "segment": 27
+  },
+  {
+   "task": "Gather competitor bundle pricing and user feedback for shared‑budget subscription model",
+   "owner": "Marcus",
+   "due": "",
+   "segment": 34
+  },
+  {
+   "task": "Prepare a quick impact analysis on the categorizer load",
+   "owner": "Jordan",
+   "due": "",
+   "segment": 35
+  },
+  {
+   "task": "Draft backend flag logic for shared‑premium accounts",
+   "owner": "Aisha",
+   "due": "",
+   "segment": 36
+  },
+  {
+   "task": "Prototype the partner‑share UI for review",
+   "owner": "Elena",
+   "due": "",
+   "segment": 37
+  }
+ ],
+ "open_questions": [
+  "Do couples on shared budgets each need a Premium subscription, or does one cover both?"
+ ],
+ "topics": [
+  {
+   "name": "Pricing decision for Premium tier",
+   "first_segment": 0,
+   "last_segment": 19
+  },
+  {
+   "name": "Feature development timeline",
+   "first_segment": 3,
+   "last_segment": 27
+  },
+  {
+   "name": "Launch planning",
+   "first_segment": 23,
+   "last_segment": 27
+  },
+  {
+   "name": "Shared‑budget subscription model open question",
+   "first_segment": 28,
+   "last_segment": 38
+  }
+ ]
+}

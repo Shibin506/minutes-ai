@@ -1,0 +1,113 @@
+WEBVTT
+
+1
+00:00:02.000 --> 00:00:08.923
+<v Priya>Thanks everyone for joining the launch retrospective; let’s start with the numbers we saw in the first week.</v>
+
+2
+00:00:09.523 --> 00:00:17.985
+<v Marcus>We got 12,400 sign-ups, the app store rating sits at 4.6, and onboarding completion was 81 percent—pretty solid for a delayed launch.</v>
+
+3
+00:00:18.585 --> 00:00:25.508
+<v Jordan>The weekly summary email performed well too, with a 52 percent open rate, beating our 40 percent target.</v>
+
+4
+00:00:26.108 --> 00:00:33.031
+<v Aisha>The only big hiccup was the Plaid rate-limit queue backing up for about two hours on launch morning.</v>
+
+5
+00:00:33.631 --> 00:00:36.708
+<v Priya>Let’s unpack that—what caused the queue to fill?</v>
+
+6
+00:00:37.308 --> 00:00:46.154
+<v Aisha>Our token refreshes spiked all at once and we only had a single worker handling the Plaid calls, so the limit was hit.</v>
+
+7
+00:00:46.754 --> 00:00:54.446
+<v Jordan>It also delayed the first batch of transaction pulls, which meant some users saw incomplete data in their first summary.</v>
+
+8
+00:00:55.046 --> 00:01:05.431
+<v Marcus>I’ve already spoken to Plaid; they agreed to drop the price from 30 cents to 22 cents per connected account per month once we cross 50,000 accounts.</v>
+
+9
+00:01:06.031 --> 00:01:12.569
+<v Priya>That’s great news for the margin. Aisha, what’s your plan to prevent the queue issue next time?</v>
+
+10
+00:01:13.169 --> 00:01:21.631
+<v Aisha>I’ll raise the worker concurrency from 2 to 5 and add an alert that fires when the queue length exceeds 500 items.</v>
+
+11
+00:01:22.231 --> 00:01:30.308
+<v Elena>From a UX side, the delay caused a few “loading” states that users reported as confusing. I’ll update the placeholder messaging.</v>
+
+12
+00:01:30.908 --> 00:01:35.138
+<v Priya>Noted. Any other incidents over 30 minutes we need to document?</v>
+
+13
+00:01:35.738 --> 00:01:43.431
+<v Jordan>The duplicate-transaction bug was caught in beta, before launch, so it stays off the postmortem list.</v>
+
+14
+00:01:44.031 --> 00:01:49.800
+<v Marcus>No other outages; the only thing that lingered was the Plaid throttling we just discussed.</v>
+
+15
+00:01:50.400 --> 00:01:55.400
+<v Priya>Then we’ll write blameless postmortems for any incident over 30 minutes, as decided.</v>
+
+16
+00:01:56.000 --> 00:01:59.846
+<v Elena>Got it. Switching to user feedback—what’s top on the list?</v>
+
+17
+00:02:00.446 --> 00:02:06.985
+<v Marcus>Shared budgets for couples still tops it, showing up in 31 percent of the feedback we collected.</v>
+
+18
+00:02:07.585 --> 00:02:13.354
+<v Priya>That aligns with what we postponed to Q1 earlier. We need to prioritize that now.</v>
+
+19
+00:02:13.954 --> 00:02:20.877
+<v Elena>I’ll schedule five user interviews focused on shared budgets and bring the findings to the next planning meeting.</v>
+
+20
+00:02:21.477 --> 00:02:26.477
+<v Aisha>Should we also consider any backend changes for shared budgets, like permission models?</v>
+
+21
+00:02:27.077 --> 00:02:33.231
+<v Jordan>We’ll need to expose a new API endpoint, but it’s straightforward once the design is locked.</v>
+
+22
+00:02:33.831 --> 00:02:41.523
+<v Marcus>From a partnership view, shared budgets could be a hook for joint marketing with banks, so it’s worth moving faster.</v>
+
+23
+00:02:42.123 --> 00:02:45.200
+<v Priya>Agreed. Anything else on the launch performance front?</v>
+
+24
+00:02:45.800 --> 00:02:53.492
+<v Jordan>No, the categorizer is holding at 95 percent accuracy in production, and the weekly summary email is stable.</v>
+
+25
+00:02:54.092 --> 00:02:56.592
+<v Aisha>All monitoring dashboards are green post-fix.</v>
+
+26
+00:02:57.192 --> 00:03:04.885
+<v Elena>I’ll also add a brief note in the onboarding flow about the upcoming shared budget feature to keep users informed.</v>
+
+27
+00:03:05.485 --> 00:03:29.331
+<v Priya>Perfect. To recap: strong sign-up and rating metrics, email open rate above target, Plaid queue issue fixed with higher concurrency and alerts, new Plaid pricing at 22 cents, shared budgets remain top request at 31 percent, and we’ll write blameless postmortems for incidents over 30 minutes. Elena, you’ll run five user interviews on shared budgets before the next planning session. Anything else?</v>
+
+28
+00:03:29.931 --> 00:03:32.623
+<v Priya>Thanks, everyone. Let’s keep the momentum going.</v>

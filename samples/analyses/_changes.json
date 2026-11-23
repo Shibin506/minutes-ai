@@ -1,0 +1,265 @@
+{
+ "threads": [
+  {
+   "topic": "Public launch date",
+   "status": "changed",
+   "summary": "Launch date moved from Oct 15 to Oct 29 due to a duplicate‑transaction bug, and stays at Oct 29.",
+   "history": [
+    {
+     "id": "M1-K2",
+     "date": "2026-09-08",
+     "kind": "point",
+     "statement": "Public launch target fixed for October 15th",
+     "start": null,
+     "source_name": "2026-09-08_smart-budgets-sprint-planning.vtt"
+    },
+    {
+     "id": "M1-D1",
+     "date": "2026-09-08",
+     "kind": "decision",
+     "statement": "Public launch date set to October 15th",
+     "start": 22.108,
+     "source_name": "2026-09-08_smart-budgets-sprint-planning.vtt"
+    },
+    {
+     "id": "M3-K3",
+     "date": "2026-10-06",
+     "kind": "point",
+     "statement": "Decision to move launch to October 29 to allow fix",
+     "start": null,
+     "source_name": "2026-10-06_smart-budgets-launch-go-no-go.vtt"
+    },
+    {
+     "id": "M3-D1",
+     "date": "2026-10-06",
+     "kind": "decision",
+     "statement": "Launch date moved to October 29th",
+     "start": 55.261,
+     "source_name": "2026-10-06_smart-budgets-launch-go-no-go.vtt"
+    },
+    {
+     "id": "M5-K7",
+     "date": "2026-10-27",
+     "kind": "point",
+     "statement": "Launch announcement will be posted on Oct 29; all teams clear for the launch",
+     "start": null,
+     "source_name": "2026-10-27_smart-budgets-launch-readiness.vtt"
+    },
+    {
+     "id": "M5-D1",
+     "date": "2026-10-27",
+     "kind": "decision",
+     "statement": "Launch Smart Budgets on Wednesday, October 29 at 9 am Pacific",
+     "start": 78.938,
+     "source_name": "2026-10-27_smart-budgets-launch-readiness.vtt"
+    }
+   ]
+  },
+  {
+   "topic": "Shared budgets scope",
+   "status": "changed",
+   "summary": "Shared budgets were initially excluded from launch, then slated for Q1, later prioritized and set for a March 15 launch, shifting the target earlier.",
+   "history": [
+    {
+     "id": "M1-K9",
+     "date": "2026-09-08",
+     "kind": "point",
+     "statement": "Shared budgets for couples left as an open question",
+     "start": null,
+     "source_name": "2026-09-08_smart-budgets-sprint-planning.vtt"
+    },
+    {
+     "id": "M1-D4",
+     "date": "2026-09-08",
+     "kind": "decision",
+     "statement": "Shared budgets will not be included at launch and will be decided later",
+     "start": 174.86,
+     "source_name": "2026-09-08_smart-budgets-sprint-planning.vtt"
+    },
+    {
+     "id": "M2-K7",
+     "date": "2026-09-22",
+     "kind": "point",
+     "statement": "Shared budgets are out of scope for launch and will be added to the Q1 roadmap.",
+     "start": null,
+     "source_name": "2026-09-22_smart-budgets-design-review.vtt"
+    },
+    {
+     "id": "M2-K8",
+     "date": "2026-09-22",
+     "kind": "point",
+     "statement": "Data model will include an owner list to enable shared budgets later without migration.",
+     "start": null,
+     "source_name": "2026-09-22_smart-budgets-design-review.vtt"
+    },
+    {
+     "id": "M2-D3",
+     "date": "2026-09-22",
+     "kind": "decision",
+     "statement": "Exclude shared budgets from launch and schedule them for Q1 roadmap.",
+     "start": 126.463,
+     "source_name": "2026-09-22_smart-budgets-design-review.vtt"
+    },
+    {
+     "id": "M6-K7",
+     "date": "2026-11-10",
+     "kind": "point",
+     "statement": "Shared budgets are the top user request (31% of feedback) and will be prioritized",
+     "start": null,
+     "source_name": "2026-11-10_smart-budgets-launch-retrospective.vtt"
+    },
+    {
+     "id": "M6-D2",
+     "date": "2026-11-10",
+     "kind": "decision",
+     "statement": "Prioritize the shared budgets feature now",
+     "start": 127.585,
+     "source_name": "2026-11-10_smart-budgets-launch-retrospective.vtt"
+    },
+    {
+     "id": "M7-D3",
+     "date": "2026-11-17",
+     "kind": "decision",
+     "statement": "Shared‑budget subscription model will be tabled for next meeting",
+     "start": 208.14600000000002,
+     "source_name": "2026-11-17_smart-budgets-premium-tier-pricing.vtt"
+    },
+    {
+     "id": "M8-D1",
+     "date": "2026-12-01",
+     "kind": "decision",
+     "statement": "Shared‑budget feature will be released in Q2, targeting mid‑April (around April 15)",
+     "start": 38.462,
+     "source_name": "2026-12-01_smart-budgets-q1-planning.vtt"
+    },
+    {
+     "id": "M10-D1",
+     "date": "2026-12-15",
+     "kind": "decision",
+     "statement": "Design will have separate private views and shared categories for couples.",
+     "start": 57.354,
+     "source_name": "2026-12-15_smart-budgets-shared-budgets-kickoff.vtt"
+    },
+    {
+     "id": "M10-D4",
+     "date": "2026-12-15",
+     "kind": "decision",
+     "statement": "Launch target for shared budgets is moved back to March 15, Q1.",
+     "start": 147.462,
+     "source_name": "2026-12-15_smart-budgets-shared-budgets-kickoff.vtt"
+    }
+   ]
+  },
+  {
+   "topic": "Plaid pricing",
+   "status": "changed",
+   "summary": "Plaid cost started at about $0.30 per account, was confirmed at $0.30, then reduced to $0.22 per account after reaching 50 000 accounts.",
+   "history": [
+    {
+     "id": "M1-K3",
+     "date": "2026-09-08",
+     "kind": "point",
+     "statement": "Decision to use Plaid for bank sync; cost ~30¢ per connected account per month",
+     "start": null,
+     "source_name": "2026-09-08_smart-budgets-sprint-planning.vtt"
+    },
+    {
+     "id": "M3-K9",
+     "date": "2026-10-06",
+     "kind": "point",
+     "statement": "Plaid pricing of $0.30 per account confirmed; Aisha will forward email to finance",
+     "start": null,
+     "source_name": "2026-10-06_smart-budgets-launch-go-no-go.vtt"
+    },
+    {
+     "id": "M3-D3",
+     "date": "2026-10-06",
+     "kind": "decision",
+     "statement": "Plaid pricing of 30 cents per account confirmed",
+     "start": 147.968,
+     "source_name": "2026-10-06_smart-budgets-launch-go-no-go.vtt"
+    },
+    {
+     "id": "M6-K4",
+     "date": "2026-11-10",
+     "kind": "point",
+     "statement": "Plaid agreed to lower pricing to $0.22 per connected account per month after 50,000 accounts",
+     "start": null,
+     "source_name": "2026-11-10_smart-budgets-launch-retrospective.vtt"
+    }
+   ]
+  },
+  {
+   "topic": "Notification method",
+   "status": "changed",
+   "summary": "Weekly summary notifications were email‑only at launch, push notifications were deferred to November, and later scheduled for Dec 8 while keeping email summaries unchanged.",
+   "history": [
+    {
+     "id": "M3-K7",
+     "date": "2026-10-06",
+     "kind": "point",
+     "statement": "Notification plan: email‑only weekly summaries for launch, push to follow in November",
+     "start": null,
+     "source_name": "2026-10-06_smart-budgets-launch-go-no-go.vtt"
+    },
+    {
+     "id": "M3-D2",
+     "date": "2026-10-06",
+     "kind": "decision",
+     "statement": "Use email‑only weekly summaries for launch",
+     "start": 125.307,
+     "source_name": "2026-10-06_smart-budgets-launch-go-no-go.vtt"
+    },
+    {
+     "id": "M5-D2",
+     "date": "2026-10-27",
+     "kind": "decision",
+     "statement": "Push notifications will be deferred until November",
+     "start": 115.231,
+     "source_name": "2026-10-27_smart-budgets-launch-readiness.vtt"
+    },
+    {
+     "id": "M8-D3",
+     "date": "2026-12-01",
+     "kind": "decision",
+     "statement": "Push notifications for budget alerts will ship December 8, replacing email‑only alerts; weekly summary email stays unchanged",
+     "start": 67.231,
+     "source_name": "2026-12-01_smart-budgets-q1-planning.vtt"
+    }
+   ]
+  },
+  {
+   "topic": "Deduplication fix timeline",
+   "status": "changed",
+   "summary": "The deduplication fix was first planned for Oct 20, moved up to Oct 19 with backfill on Oct 21, and has now been completed.",
+   "history": [
+    {
+     "id": "M3-K4",
+     "date": "2026-10-06",
+     "kind": "point",
+     "statement": "Aisha will ship dedupe fix by Oct 20 and run backfill on Oct 21",
+     "start": null,
+     "source_name": "2026-10-06_smart-budgets-launch-go-no-go.vtt"
+    },
+    {
+     "id": "M4-K1",
+     "date": "2026-10-13",
+     "kind": "point",
+     "statement": "Dedupe‑on‑Plaid‑transaction‑ID fix in review; edge case added for Capital One pending transactions; timeline moved up to Oct 19 with backfill on Oct 21.",
+     "start": null,
+     "source_name": "2026-10-13_smart-budgets-dedupe-fix-status.vtt"
+    },
+    {
+     "id": "M5-K2",
+     "date": "2026-10-27",
+     "kind": "point",
+     "statement": "Deduplication fix processed 41,000 transactions with zero duplicates observed",
+     "start": null,
+     "source_name": "2026-10-27_smart-budgets-launch-readiness.vtt"
+    }
+   ]
+  }
+ ],
+ "meetings": 10,
+ "method": "openai/gpt-oss-120b"
+}

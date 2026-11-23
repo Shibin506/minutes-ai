@@ -1,0 +1,107 @@
+{
+ "title": "Smart Budgets Security Review",
+ "summary": "The team reviewed security and compliance for Smart Budgets, deciding to migrate token storage to a cloud KMS with automatic rotation and to complete a SOC 2 Type I audit by March 31st using Prescient Assurance. A Cobalt penetration test is scheduled for the week of Jan 12, and push notification and email payloads were confirmed to contain no sensitive data. Open questions remain around the retention period for raw transaction data and its impact on Plaid agreements. Next steps include legal guidance on retention and UI updates, with a follow‑up meeting next week.",
+ "key_points": [
+  "Tokens will be moved to a cloud KMS with 90‑day automatic key rotation.",
+  "SOC 2 Type I audit targeted for March 31st, auditor Prescient Assurance.",
+  "Penetration test with Cobalt booked for the week of Jan 12.",
+  "Push notifications and weekly summary emails only include budget name and usage percentage.",
+  "Categorizer data is already masked; no extra controls needed.",
+  "Legal input needed on raw transaction data retention.",
+  "UI will be updated to communicate retention policy once finalized."
+ ],
+ "decisions": [
+  {
+   "decision": "Migrate Plaid tokens to a cloud KMS with automatic key rotation every 90 days",
+   "segment": 2
+  },
+  {
+   "decision": "Conduct a SOC 2 Type I audit with Prescient Assurance, target completion by March 31st",
+   "segment": 7
+  },
+  {
+   "decision": "No additional controls needed for the categorizer; token handling compliance is sufficient",
+   "segment": 9
+  },
+  {
+   "decision": "Schedule Cobalt penetration test for the week of January 12th",
+   "segment": 18
+  },
+  {
+   "decision": "Push notification payloads contain only budget name and percentage used, no sensitive data",
+   "segment": 23
+  },
+  {
+   "decision": "Weekly summary email follows same data rule as push notifications",
+   "segment": 24
+  }
+ ],
+ "action_items": [
+  {
+   "task": "Migrate Plaid tokens to a cloud KMS and set up automatic key rotation every 90 days",
+   "owner": "Aisha",
+   "due": "January 15th",
+   "segment": 2
+  },
+  {
+   "task": "Adjust UI to inform users about the retention period for raw transaction data",
+   "owner": "Elena",
+   "due": "",
+   "segment": 15
+  },
+  {
+   "task": "Document UI changes for penetration test scope",
+   "owner": "Elena",
+   "due": "",
+   "segment": 20
+  },
+  {
+   "task": "Provide legal guidance on retention periods for raw transaction data after a user disconnects an account",
+   "owner": "Unassigned",
+   "due": "",
+   "segment": 11
+  },
+  {
+   "task": "Schedule next week meeting to discuss legal recommendation and KMS migration updates",
+   "owner": "Priya",
+   "due": "next week",
+   "segment": 29
+  }
+ ],
+ "open_questions": [
+  "What retention period should be used for raw transaction data after a user disconnects an account?",
+  "Will the retention policy affect partnership agreements with Plaid?"
+ ],
+ "topics": [
+  {
+   "name": "Token storage migration",
+   "first_segment": 2,
+   "last_segment": 5
+  },
+  {
+   "name": "Audit planning",
+   "first_segment": 6,
+   "last_segment": 9
+  },
+  {
+   "name": "Data retention policy",
+   "first_segment": 10,
+   "last_segment": 15
+  },
+  {
+   "name": "Penetration testing",
+   "first_segment": 16,
+   "last_segment": 20
+  },
+  {
+   "name": "Push notifications compliance",
+   "first_segment": 22,
+   "last_segment": 24
+  },
+  {
+   "name": "Recap and next steps",
+   "first_segment": 25,
+   "last_segment": 29
+  }
+ ]
+}

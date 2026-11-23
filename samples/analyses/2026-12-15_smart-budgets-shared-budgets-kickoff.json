@@ -1,0 +1,84 @@
+{
+ "title": "Shared Budgets Kickoff Meeting",
+ "summary": "During the shared‑budget kickoff, the team confirmed a design that separates private and shared budget categories for couples and agreed on an email‑based invite flow that expires after seven days. The weekly summary email will remain unchanged, showing shared categories to both partners. The launch date was moved from April 15 to March 15, aligning with Q1 resources, and new hires starting January 5 shift the engineering estimate to seven weeks. Action items were set for design delivery (Elena, Jan 9), permissions spec (Aisha, Jan 12), pipeline update (Jordan), and partner outreach materials (Marcus). The meeting closed with next‑step coordination and a plan to reconvene next week.",
+ "key_points": [
+  "Separate private and shared budget views confirmed",
+  "Invite flow uses email with 7‑day link",
+  "Weekly summary email remains unchanged, with shared categories visible to both partners",
+  "Launch target moved to March 15 (Q1)",
+  "New hires starting Jan 5 shift engineering estimate to seven weeks",
+  "Action items: Elena designs Jan 9, Aisha spec Jan 12, Jordan pipeline update, Marcus outreach materials"
+ ],
+ "decisions": [
+  {
+   "decision": "Design will have separate private views and shared categories for couples.",
+   "segment": 7
+  },
+  {
+   "decision": "Invite flow will be invite-by-email with a 7‑day link expiry.",
+   "segment": 15
+  },
+  {
+   "decision": "Weekly summary email will stay as is and show shared categories in both partners’ summaries.",
+   "segment": 12
+  },
+  {
+   "decision": "Launch target for shared budgets is moved back to March 15, Q1.",
+   "segment": 20
+  }
+ ],
+ "action_items": [
+  {
+   "task": "Deliver final shared-budget designs",
+   "owner": "Elena",
+   "due": "Jan 9",
+   "segment": 23
+  },
+  {
+   "task": "Write permissions spec with invite-by-email flow and 7‑day expiry",
+   "owner": "Aisha",
+   "due": "Jan 12",
+   "segment": 25
+  },
+  {
+   "task": "Update categorizer pipeline to flag shared categories",
+   "owner": "Jordan",
+   "due": "",
+   "segment": 27
+  },
+  {
+   "task": "Coordinate with sales to prepare partner outreach materials for invite flow",
+   "owner": "Marcus",
+   "due": "",
+   "segment": 28
+  }
+ ],
+ "open_questions": [],
+ "topics": [
+  {
+   "name": "Kickoff and scope discussion",
+   "first_segment": 0,
+   "last_segment": 2
+  },
+  {
+   "name": "User insights and design proposal",
+   "first_segment": 3,
+   "last_segment": 7
+  },
+  {
+   "name": "Invite flow and email details",
+   "first_segment": 8,
+   "last_segment": 17
+  },
+  {
+   "name": "Timeline and resource update",
+   "first_segment": 18,
+   "last_segment": 22
+  },
+  {
+   "name": "Action items and wrap‑up",
+   "first_segment": 23,
+   "last_segment": 31
+  }
+ ]
+}

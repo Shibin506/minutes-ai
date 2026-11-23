@@ -158,6 +158,18 @@ class Store:
 
     # -- retrieval ----------------------------------------------------------
 
+    def chunks_version(self) -> tuple[int, int]:
+        """Changes whenever chunks are added or removed (used to refresh vector indexes)."""
+        row = self._conn.execute("SELECT COUNT(*), COALESCE(MAX(id), 0) FROM chunks").fetchone()
+        return (row[0], row[1])
+
+    def all_chunks(self) -> list[SearchHit]:
+        rows = self._conn.execute(
+            "SELECT c.meeting_id, m.title, c.idx, c.start, c.end, c.text FROM chunks c "
+            "JOIN meetings m ON m.id = c.meeting_id ORDER BY c.id"
+        ).fetchall()
+        return [SearchHit(r[0], r[1], r[2], r[3], r[4], r[5], 0.0) for r in rows]
+
     def search(self, question: str, k: int = 8, meeting_id: str | None = None) -> list[SearchHit]:
         query = fts_query(question)
         if not query:

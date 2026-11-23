@@ -1,0 +1,82 @@
+{
+ "title": "Smart Budgets Launch Retrospective",
+ "summary": "The team reviewed the first week of the Smart Budgets launch, noting strong sign‑up numbers, a 4.6 app rating, and a 52% email open rate that beat the target. A two‑hour Plaid rate‑limit queue issue was traced to a spike in token refreshes, leading to a plan to increase worker concurrency and add alerts, while Plaid offered a reduced pricing tier. Shared budgets emerged as the top user request (31% of feedback), prompting scheduled user interviews and a decision to prioritize the feature. The group also agreed to write blameless postmortems for any incident lasting over 30 minutes. Action items were assigned to address the queue, UX messaging, and user interview preparation.",
+ "key_points": [
+  "12,400 sign‑ups, 4.6 app store rating, and 81% onboarding completion in the first week",
+  "Weekly summary email achieved a 52% open rate, surpassing the 40% goal",
+  "Plaid rate‑limit queue backed up for about two hours due to a token‑refresh spike and a single worker",
+  "Plaid agreed to lower pricing to $0.22 per connected account per month after 50,000 accounts",
+  "Aisha will increase Plaid worker concurrency to 5 and add an alert for queue length >500 items",
+  "Elena will update placeholder loading messages and add a brief note about shared budgets in the onboarding flow",
+  "Shared budgets are the top user request (31% of feedback) and will be prioritized",
+  "Elena will schedule five user interviews on shared budgets and share findings at the next planning meeting",
+  "Decision to write blameless postmortems for any incident over 30 minutes",
+  "Categorizer accuracy remains at 95% and monitoring dashboards are green"
+ ],
+ "decisions": [
+  {
+   "decision": "Write blameless postmortems for any incident over 30 minutes",
+   "segment": 14
+  },
+  {
+   "decision": "Prioritize the shared budgets feature now",
+   "segment": 17
+  }
+ ],
+ "action_items": [
+  {
+   "task": "Raise Plaid worker concurrency to 5 and add an alert when queue length exceeds 500 items",
+   "owner": "Aisha",
+   "due": "",
+   "segment": 9
+  },
+  {
+   "task": "Update placeholder messaging for loading states caused by Plaid delays",
+   "owner": "Elena",
+   "due": "",
+   "segment": 10
+  },
+  {
+   "task": "Schedule five user interviews focused on shared budgets and present findings at the next planning meeting",
+   "owner": "Elena",
+   "due": "",
+   "segment": 18
+  },
+  {
+   "task": "Add a brief note in the onboarding flow about the upcoming shared budget feature to keep users informed",
+   "owner": "Elena",
+   "due": "",
+   "segment": 25
+  }
+ ],
+ "open_questions": [
+  "Should we consider backend changes for shared budgets, such as new permission models?"
+ ],
+ "topics": [
+  {
+   "name": "Launch performance metrics",
+   "first_segment": 0,
+   "last_segment": 2
+  },
+  {
+   "name": "Plaid queue issue and mitigation",
+   "first_segment": 3,
+   "last_segment": 10
+  },
+  {
+   "name": "Incident documentation decision",
+   "first_segment": 11,
+   "last_segment": 14
+  },
+  {
+   "name": "User feedback and shared budgets prioritization",
+   "first_segment": 15,
+   "last_segment": 21
+  },
+  {
+   "name": "Monitoring status and final recap",
+   "first_segment": 22,
+   "last_segment": 26
+  }
+ ]
+}

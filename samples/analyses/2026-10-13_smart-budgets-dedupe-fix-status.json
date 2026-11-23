@@ -1,0 +1,109 @@
+{
+ "title": "Smart Budgets Dedupe Fix Status Update",
+ "summary": "The team confirmed the dedupe‑on‑Plaid‑transaction‑ID fix will merge on Oct 19 with a backfill on Oct 21, and a new edge case was added to the matching logic. A demo environment will be ready by Oct 27 for prospect demos, while the weekly launch email targets a 40% open rate and will include a FAQ link. The support FAQ on duplicate transactions will be completed by Friday, and all non‑critical feature work is frozen until after the Oct 29 launch.",
+ "key_points": [
+  "Dedupe‑on‑Plaid‑transaction‑ID fix in review; edge case added for Capital One pending transactions; timeline moved up to Oct 19 with backfill on Oct 21.",
+  "Demo environment required for two enterprise prospect demos; target ready by Oct 27.",
+  "Weekly summary email drafted, targeting 40% open rate and will include a brief FAQ link.",
+  "Support FAQ about duplicate transactions to be ready by Friday.",
+  "Feature freeze declared: no new feature requests, categorizer enhancements and non‑essential design work paused until after Oct 29."
+ ],
+ "decisions": [
+  {
+   "decision": "Code merge scheduled for Oct 19 and backfill for Oct 21, confirming launch sequence",
+   "segment": 14
+  },
+  {
+   "decision": "Include a brief FAQ note with a link in the weekly summary email",
+   "segment": 20
+  },
+  {
+   "decision": "Freeze all new feature requests for this sprint; only critical launch items will be merged",
+   "segment": 24
+  },
+  {
+   "decision": "Hold off on any categorizer enhancements until after Oct 29",
+   "segment": 26
+  },
+  {
+   "decision": "Pause non‑essential design iterations until after launch",
+   "segment": 27
+  },
+  {
+   "decision": "Demo environment will be ready by Oct 27 for prospect demos",
+   "segment": 30
+  }
+ ],
+ "action_items": [
+  {
+   "task": "Merge the dedupe fix into main branch",
+   "owner": "Aisha",
+   "due": "October 19",
+   "segment": 28
+  },
+  {
+   "task": "Prioritize and build demo screens once UI is locked",
+   "owner": "Elena",
+   "due": "",
+   "segment": 9
+  },
+  {
+   "task": "Prepare the support FAQ about duplicate transactions",
+   "owner": "Elena",
+   "due": "Friday",
+   "segment": 16
+  },
+  {
+   "task": "Add the FAQ link to the weekly email copy before final approval",
+   "owner": "Elena",
+   "due": "",
+   "segment": 21
+  },
+  {
+   "task": "Ensure the demo environment is operational for prospect demos",
+   "owner": "Marcus",
+   "due": "October 27",
+   "segment": 30
+  },
+  {
+   "task": "Do not implement any categorizer enhancements until after Oct 29",
+   "owner": "Jordan",
+   "due": "Oct 29",
+   "segment": 26
+  },
+  {
+   "task": "Pause any non‑essential design iterations until after launch",
+   "owner": "Elena",
+   "due": "",
+   "segment": 27
+  }
+ ],
+ "open_questions": [],
+ "topics": [
+  {
+   "name": "Dedupe fix status & timeline",
+   "first_segment": 0,
+   "last_segment": 7
+  },
+  {
+   "name": "Demo environment preparation",
+   "first_segment": 8,
+   "last_segment": 10
+  },
+  {
+   "name": "Weekly email, metrics, and FAQ",
+   "first_segment": 11,
+   "last_segment": 21
+  },
+  {
+   "name": "Additional dedupe coverage and feature freeze",
+   "first_segment": 22,
+   "last_segment": 27
+  },
+  {
+   "name": "Final commitments and recap",
+   "first_segment": 28,
+   "last_segment": 31
+  }
+ ]
+}

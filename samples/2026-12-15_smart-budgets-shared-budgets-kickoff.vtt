@@ -1,0 +1,129 @@
+WEBVTT
+
+1
+00:00:02.000 --> 00:00:09.692
+<v Priya>Good morning, everyone. Let's kick off the shared-budget kickoff and make sure we're aligned on scope, timeline, and next steps.</v>
+
+2
+00:00:10.292 --> 00:00:17.215
+<v Marcus>Quick check: is shared budgets still a Q2 feature, or has anything shifted since Q1 planning?</v>
+
+3
+00:00:17.815 --> 00:00:24.738
+<v Priya>We'll discuss that in a moment; first, Elena, can you share what you learned from the user interviews?</v>
+
+4
+00:00:25.338 --> 00:00:34.954
+<v Elena>Sure. I ran five interviews with couples and the consistent theme was they want separate private spending tracks plus shared categories, not one merged budget.</v>
+
+5
+00:00:35.554 --> 00:00:45.554
+<v Aisha>Got it. That aligns with the data model we added to the budget table back in September—the owner list column means we don’t need any migration.</v>
+
+6
+00:00:46.154 --> 00:00:52.308
+<v Jordan>From a ML standpoint, keeping private and shared categories separate will simplify the categorizer input features.</v>
+
+7
+00:00:52.908 --> 00:00:56.754
+<v Priya>Great. Elena, can you walk us through the design proposal?</v>
+
+8
+00:00:57.354 --> 00:01:08.508
+<v Elena>The design shows each person keeping their own private budget view, while shared categories like rent and groceries appear in a joint view that both can see and edit.</v>
+
+9
+00:01:09.108 --> 00:01:16.031
+<v Marcus>That sounds like the right balance for couples. How will they bring a partner into the shared view?</v>
+
+10
+00:01:16.631 --> 00:01:22.015
+<v Priya>We’ll decide that in a moment. Aisha, any technical constraints on the invite flow?</v>
+
+11
+00:01:22.615 --> 00:01:29.923
+<v Aisha>Not really. With the owner list already in place, we just need to add a partner_id and status flag.</v>
+
+12
+00:01:30.523 --> 00:01:36.292
+<v Jordan>We'll need to flag transactions that belong to shared categories for the weekly summary email.</v>
+
+13
+00:01:36.892 --> 00:01:44.200
+<v Priya>Speaking of emails, the weekly summary email stays as it is, and shared categories will show up in both partners’ summaries.</v>
+
+14
+00:01:44.800 --> 00:01:52.492
+<v Elena>Understood. For the invite, I suggest an invite-by-email flow where the partner gets a link that expires after 7 days.</v>
+
+15
+00:01:53.092 --> 00:01:57.323
+<v Marcus>Seven days feels reasonable; it pushes urgency without being too tight.</v>
+
+16
+00:01:57.923 --> 00:02:00.615
+<v Priya>Agreed. Any concerns about the expiration window?</v>
+
+17
+00:02:01.215 --> 00:02:06.985
+<v Aisha>No, we can handle the token expiry logic alongside the existing Plaid token refresh work.</v>
+
+18
+00:02:07.585 --> 00:02:13.354
+<v Jordan>Just need to make sure the summary generation checks the shared-budget flag before pulling data.</v>
+
+19
+00:02:13.954 --> 00:02:21.646
+<v Priya>Good. Now timeline—our two new hires start Jan 5, which shifts our engineering estimate for shared budgets to seven weeks.</v>
+
+20
+00:02:22.246 --> 00:02:26.862
+<v Elena>So that pushes the target from April 15 to March 15, right?</v>
+
+21
+00:02:27.462 --> 00:02:32.846
+<v Priya>Exactly. We'll move shared budgets back to Q1 with a target of March 15.</v>
+
+22
+00:02:33.446 --> 00:02:38.831
+<v Marcus>That’s acceptable; it aligns with the partnership rollout we have planned for early Q1.</v>
+
+23
+00:02:39.431 --> 00:02:46.354
+<v Aisha>With the new engineers, we should be able to hit that if we lock down the spec early.</v>
+
+24
+00:02:46.954 --> 00:02:51.569
+<v Priya>Action items: Elena, please deliver the final shared-budget designs by Jan 9.</v>
+
+25
+00:02:52.169 --> 00:02:54.669
+<v Elena>Will do.</v>
+
+26
+00:02:55.269 --> 00:03:00.269
+<v Priya>Aisha, write the permissions spec—including the invite-by-email flow and 7-day expiry—by Jan 12.</v>
+
+27
+00:03:00.869 --> 00:03:03.369
+<v Aisha>On it.</v>
+
+28
+00:03:03.969 --> 00:03:09.354
+<v Jordan>I’ll update the categorizer pipeline to flag shared categories once the spec is in.</v>
+
+29
+00:03:09.954 --> 00:03:15.723
+<v Marcus>I’ll coordinate with the sales team to prepare partner outreach materials for the invite flow.</v>
+
+30
+00:03:16.323 --> 00:03:18.823
+<v Priya>Perfect. Anything else before we wrap?</v>
+
+31
+00:03:19.423 --> 00:03:24.808
+<v Elena>No, just confirming the designs will include both private and shared views as discussed.</v>
+
+32
+00:03:25.408 --> 00:03:42.715
+<v Priya>Thanks, everyone. To recap: we’ve confirmed the private + shared design, set a 7-day email invite expiration, moved the launch target to March 15, and assigned Elena’s Jan 9 design deadline and Aisha’s Jan 12 spec deadline. Let’s reconvene next week for progress. Meeting adjourned.</v>

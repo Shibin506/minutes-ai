@@ -60,6 +60,48 @@ export interface TrackedActionItem extends ActionItem {
   start: number;
 }
 
+export interface Health {
+  status: string;
+  model: string;
+  demo: boolean;
+  retrieval: string;
+  /** Server-side live transcription (Groq Whisper) is available. */
+  live: boolean;
+  /** Hosted demo: sample meetings preloaded, storage may reset. */
+  hosted_demo: boolean;
+}
+
+export type ChangeStatus = "changed" | "reversed" | "consistent";
+
+export interface ChangeEntry {
+  id: string;
+  meeting_id: string;
+  meeting_title: string;
+  date: string;
+  kind: "decision" | "action" | "point";
+  statement: string;
+  /** Null for key points, which aren't tied to one moment. */
+  start: number | null;
+}
+
+export interface ChangeThread {
+  topic: string;
+  status: ChangeStatus;
+  summary: string;
+  history: ChangeEntry[];
+}
+
+export interface Changes {
+  threads: ChangeThread[];
+  meetings: number;
+  method: string;
+}
+
+export interface FollowUp {
+  subject: string;
+  body: string;
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`/api${path}`, init);
   if (!res.ok) {
@@ -70,7 +112,31 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  health: () => request<{ status: string; model: string }>("/health"),
+  health: () => request<Health>("/health"),
+  changes: () => request<Changes>("/changes"),
+  followUp: (id: string) => request<FollowUp>(`/meetings/${id}/follow-up`, { method: "POST" }),
+  icsUrl: (id: string) => `/api/meetings/${id}/action-items.ics`,
+  allIcsUrl: () => "/api/action-items.ics",
+  liveTranscribe: (chunk: Blob, offset: number, prompt: string) => {
+    const body = new FormData();
+    body.append("file", chunk, `chunk.${chunk.type.includes("mp4") ? "mp4" : "webm"}`);
+    body.append("offset", String(offset));
+    body.append("speaker", "Speaker");
+    body.append("prompt", prompt);
+    return request<Segment[]>("/live/transcribe", { method: "POST", body });
+  },
+  liveNotes: (title: string, segments: Segment[]) =>
+    request<Analysis>("/live/notes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, segments }),
+    }),
+  liveSave: (title: string, segments: Segment[]) =>
+    request<Meeting>("/live/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, segments }),
+    }),
   meetings: () => request<Meeting[]>("/meetings"),
   meeting: (id: string) => request<MeetingDetail>(`/meetings/${id}`),
   actionItems: () => request<TrackedActionItem[]>("/action-items"),

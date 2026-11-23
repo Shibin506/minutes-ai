@@ -1,0 +1,83 @@
+{
+ "title": "Smart budgets design review",
+ "summary": "The team streamlined the Smart Budgets onboarding from five to three steps, moving notifications to after the first week. They approved shipping the LLM categorizer at launch despite its $2 per 1,000 users monthly cost. Shared budgets were deferred to the Q1 roadmap with a data model change to support future owners, and an empty state for bank sync failures will be designed by Friday.",
+ "key_points": [
+  "Current five-step onboarding causes a 40% drop at the bank connection step.",
+  "Merging goals and budget amounts into one step and auto‑suggesting amounts from the past 90 days.",
+  "LLM categorizer achieved 93% accuracy; cost is about $2 per thousand users per month.",
+  "Decision to ship the LLM categorizer for launch.",
+  "Adopt a three-step onboarding flow and defer notifications to after the first week.",
+  "Need an empty state for failed bank sync; Elena will deliver by Friday.",
+  "Shared budgets are out of scope for launch and will be added to the Q1 roadmap.",
+  "Data model will include an owner list to enable shared budgets later without migration.",
+  "Notification channel (push vs email) remains an open question."
+ ],
+ "decisions": [
+  {
+   "decision": "Adopt a three-step onboarding flow: welcome, connect bank, review suggested budgets; move notifications after the first week.",
+   "segment": 9
+  },
+  {
+   "decision": "Ship the LLM categorizer for launch.",
+   "segment": 8
+  },
+  {
+   "decision": "Exclude shared budgets from launch and schedule them for Q1 roadmap.",
+   "segment": 14
+  },
+  {
+   "decision": "Implement budget table with an owner list to support shared budgets later without migration.",
+   "segment": 16
+  }
+ ],
+ "action_items": [
+  {
+   "task": "Design empty state that allows manual budget entry for bank sync failures",
+   "owner": "Elena",
+   "due": "Friday",
+   "segment": 12
+  },
+  {
+   "task": "Add owner list field to budget table to support shared budgets",
+   "owner": "Aisha",
+   "due": "",
+   "segment": 16
+  },
+  {
+   "task": "Add shared budgets to the product roadmap for Q1",
+   "owner": "Priya",
+   "due": "Q1",
+   "segment": 14
+  }
+ ],
+ "open_questions": [
+  "Which notification channels (push, email, or both) should be used for onboarding reminders?"
+ ],
+ "topics": [
+  {
+   "name": "Onboarding flow length & user drop",
+   "first_segment": 0,
+   "last_segment": 4
+  },
+  {
+   "name": "LLM categorizer accuracy and cost",
+   "first_segment": 5,
+   "last_segment": 8
+  },
+  {
+   "name": "Final onboarding steps & empty state",
+   "first_segment": 9,
+   "last_segment": 12
+  },
+  {
+   "name": "Shared budgets scope & data model",
+   "first_segment": 13,
+   "last_segment": 16
+  },
+  {
+   "name": "Notifications strategy",
+   "first_segment": 17,
+   "last_segment": 19
+  }
+ ]
+}

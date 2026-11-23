@@ -3,10 +3,11 @@
 import json
 
 import httpx
+import pytest
 import respx
 
 from minutes.config import Settings
-from minutes.llm import GROQ_BASE_URL, GroqLLM, build_llm
+from minutes.llm import GROQ_BASE_URL, AnalysisError, GroqLLM, build_llm
 from minutes.transcribe import GROQ_TRANSCRIBE_URL, transcribe_groq
 from minutes.transcript import Segment
 
@@ -52,7 +53,9 @@ def test_switches_to_a_current_model_when_the_configured_one_is_retired():
         model = json.loads(request.content)["model"]
         calls.append(model)
         if model == "llama-3.3-70b-versatile":
-            return httpx.Response(400, json={"error": {"message": "model has been decommissioned"}})
+            return httpx.Response(
+                400, json={"error": {"code": "model_decommissioned", "message": "retired"}}
+            )
         return ok("Hello")
 
     respx.post(URL).mock(side_effect=chat)
@@ -108,3 +111,38 @@ def test_provider_is_picked_from_whichever_key_is_set(monkeypatch):
     assert isinstance(build_llm(s), GroqLLM)
     monkeypatch.delenv("Groq")
     assert Settings.from_env().demo_mode is True
+
+
+@respx.mock
+def test_other_400s_do_not_switch_models():
+    respx.post(URL).mock(
+        return_value=httpx.Response(
+            400,
+            json={"error": {"code": "json_validate_failed", "message": "model output was invalid"}},
+        )
+    )
+    llm = GroqLLM(model="openai/gpt-oss-20b", api_key="k", retry_delays=())
+    with pytest.raises(AnalysisError):
+        llm.complete("sys", "hi")
+    assert llm.model == "openai/gpt-oss-20b"
+
+
+@respx.mock
+def test_daily_quota_falls_back_to_another_model():
+    seen = []
+
+    def chat(request):
+        model = json.loads(request.content)["model"]
+        seen.append(model)
+        if model == "openai/gpt-oss-120b":
+            return httpx.Response(
+                429,
+                headers={"retry-after": "420"},
+                json={"error": {"message": "Rate limit reached on tokens per day (TPD)"}},
+            )
+        return ok("Fine")
+
+    respx.post(URL).mock(side_effect=chat)
+    llm = GroqLLM(api_key="k", retry_delays=())
+    assert llm.complete("sys", "hi") == "Fine"
+    assert seen == ["openai/gpt-oss-120b", "openai/gpt-oss-20b"]

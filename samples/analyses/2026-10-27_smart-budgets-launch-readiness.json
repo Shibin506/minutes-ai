@@ -1,0 +1,122 @@
+{
+ "title": "Smart Budgets Launch Readiness Meeting",
+ "summary": "The team reviewed the final launch checklist for Smart Budgets, confirming that support training, status page, deduplication fix, and categorizer accuracy are all on track. Risks around Plaid rate‑limits were mitigated with an exponential backoff queue and real‑time alerts. Monitoring plans, UI finalization, and communication steps were finalized, and a decision was made to launch on Wednesday, October 29 at 9 am Pacific. All owners confirmed their responsibilities and the launch is set for a smooth rollout.",
+ "key_points": [
+  "Support team training completed and status page ready for launch",
+  "Deduplication fix processed 41,000 transactions with zero duplicates observed",
+  "Categorizer accuracy reached 95% in production",
+  "Plaid integration risk addressed with exponential backoff queue; alerts added to status page",
+  "Monitoring plan includes alerts, 48‑hour dashboard watch, and handoff to ops on day three",
+  "UI assets and minor copy changes are on schedule for launch",
+  "Launch announcement will be posted on Oct 29; all teams clear for the launch"
+ ],
+ "decisions": [
+  {
+   "decision": "Launch Smart Budgets on Wednesday, October 29 at 9 am Pacific",
+   "segment": 9
+  },
+  {
+   "decision": "Push notifications will be deferred until November",
+   "segment": 14
+  }
+ ],
+ "action_items": [
+  {
+   "task": "Prepare final assets for the launch splash",
+   "owner": "Elena",
+   "due": "tomorrow",
+   "segment": 4
+  },
+  {
+   "task": "Add a queue with exponential backoff for Plaid calls",
+   "owner": "Aisha",
+   "due": "",
+   "segment": 6
+  },
+  {
+   "task": "Set up alerts on categorization error dashboards and monitor for the first 48 hours post-launch",
+   "owner": "Jordan",
+   "due": "",
+   "segment": 8
+  },
+  {
+   "task": "Review support handoff documentation",
+   "owner": "Marcus",
+   "due": "today",
+   "segment": 10
+  },
+  {
+   "task": "Ensure email-only weekly summary template is locked and scheduler set to start on launch day",
+   "owner": "Jordan",
+   "due": "",
+   "segment": 14
+  },
+  {
+   "task": "Push minor copy changes on the “Set Your Goal” screen",
+   "owner": "Elena",
+   "due": "",
+   "segment": 16
+  },
+  {
+   "task": "Transition monitoring dashboards to ops on day three and stay on call for the first 24 hours",
+   "owner": "Jordan",
+   "due": "",
+   "segment": 22
+  },
+  {
+   "task": "Post launch announcement in the company all-hands channel on October 29",
+   "owner": "Priya",
+   "due": "Oct 29",
+   "segment": 23
+  },
+  {
+   "task": "Watch categorization error dashboards for the first 48 hours",
+   "owner": "Jordan",
+   "due": "",
+   "segment": 24
+  }
+ ],
+ "open_questions": [],
+ "topics": [
+  {
+   "name": "Launch readiness overview",
+   "first_segment": 0,
+   "last_segment": 3
+  },
+  {
+   "name": "UI assets and Plaid integration risk",
+   "first_segment": 4,
+   "last_segment": 7
+  },
+  {
+   "name": "Monitoring alerts and support documentation",
+   "first_segment": 8,
+   "last_segment": 10
+  },
+  {
+   "name": "Backfill performance and email summary",
+   "first_segment": 11,
+   "last_segment": 14
+  },
+  {
+   "name": "UI tweaks and release notes",
+   "first_segment": 15,
+   "last_segment": 18
+  },
+  {
+   "name": "Metrics validation and ops handoff",
+   "first_segment": 19,
+   "last_segment": 22
+  },
+  {
+   "name": "Launch announcement and final actions",
+   "first_segment": 23,
+   "last_segment": 26
+  },
+  {
+   "name": "Wrap‑up and next steps",
+   "first_segment": 27,
+   "last_segment": 29
+  }
+ ]
+}
