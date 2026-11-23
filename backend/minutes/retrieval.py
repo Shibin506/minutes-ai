@@ -193,6 +193,7 @@ class Retriever:
         self._version: tuple | None = None
         self._chunks: list[SearchHit] = []
         self._vectors = np.zeros((0, 1))
+        self.rerank_errors = 0  # reranks that failed and fell back to hybrid order
 
     def _index(self) -> None:
         version = self.store.chunks_version()
@@ -236,6 +237,7 @@ class Retriever:
                 max_tokens=1200,
             ).ranking
         except Exception:  # noqa: BLE001 - reranking is an improvement, never a requirement
+            self.rerank_errors += 1
             return hits
         seen, out = set(), []
         for n in order:

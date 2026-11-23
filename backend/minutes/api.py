@@ -98,7 +98,8 @@ def create_app(settings: Settings | None = None, llm: LLM | None = None) -> Fast
             "version": __version__,
             "model": llm.name,
             "demo": bool(getattr(llm, "demo", False)),
-            "retrieval": settings.retrieval,
+            # Reranking needs a model: without one (demo mode) it is plain hybrid.
+            "retrieval": settings.retrieval if retriever.llm else settings.retrieval.split("+")[0],
             "live": bool(settings.groq_api_key),
             "hosted_demo": settings.seed_samples,
         }

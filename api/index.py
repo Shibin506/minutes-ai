@@ -17,6 +17,7 @@ os.environ.setdefault("MINUTES_SEED_SAMPLES", "1")
 os.environ.setdefault("MINUTES_SYNC_ANALYSIS", "1")
 os.environ.setdefault("MINUTES_SAMPLES_DIR", str(ROOT / "samples"))
 os.environ.setdefault("MINUTES_RETRIEVAL_K", "6")
+os.environ.setdefault("MINUTES_RETRIEVAL", "hybrid+rerank")  # plain hybrid without an API key
 
 from minutes.api import create_app  # noqa: E402
 

@@ -121,6 +121,7 @@ def main() -> None:
         from minutes.llm import GroqLLM
 
         groq = GroqLLM("openai/gpt-oss-20b", os.environ["GROQ_API_KEY"], reasoning_effort="low")
+        groq.quota_fallbacks = ()  # measure this model: wait out rate limits, don't switch
         configs.append(("Hybrid (LSA) + Groq rerank", "hybrid+rerank", None, groq))
         if args.gemini:
             configs.append(("Hybrid (Gemini) + Groq rerank", "hybrid+rerank", gem, groq))
@@ -149,6 +150,11 @@ def main() -> None:
             )
             cols = f"{r.n:3d} {r.hit_at_1:6.2f} {r.hit_at_3:6.2f} {r.mrr:5.2f}"
             print(f"{label:38s} {case_set:11s} {cols}")
+            if retriever.rerank_errors:
+                print(
+                    f"  ! {retriever.rerank_errors} rerank calls failed (fell back to hybrid order)"
+                )
+                retriever.rerank_errors = 0
     if args.json:
         args.json.write_text(json.dumps(rows, indent=1))
 
