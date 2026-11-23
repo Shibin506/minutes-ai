@@ -120,7 +120,12 @@ def main() -> None:
     if args.rerank:
         from minutes.llm import GroqLLM
 
-        groq = GroqLLM("openai/gpt-oss-20b", os.environ["GROQ_API_KEY"], reasoning_effort="low")
+        groq = GroqLLM(
+            "openai/gpt-oss-20b",
+            os.environ["GROQ_API_KEY"],
+            reasoning_effort="low",
+            retry_delays=(10.0, 20.0, 30.0, 60.0, 60.0),  # free tier: 8K tokens a minute
+        )
         groq.quota_fallbacks = ()  # measure this model: wait out rate limits, don't switch
         configs.append(("Hybrid (LSA) + Groq rerank", "hybrid+rerank", None, groq))
         if args.gemini:

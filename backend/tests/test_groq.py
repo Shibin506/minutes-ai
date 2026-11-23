@@ -180,3 +180,20 @@ def test_whisper_silence_hallucination_dropped():
 
     http = httpx.Client(transport=httpx.MockTransport(handler))
     assert transcribe_groq(b"x", "c.webm", "k", http=http) == []
+
+
+@respx.mock
+def test_streamed_answers_wait_out_a_per_minute_limit(monkeypatch):
+    monkeypatch.setattr("minutes.llm.time.sleep", lambda s: None)
+    calls = []
+
+    def chat(request):
+        calls.append(json.loads(request.content)["model"])
+        if len(calls) == 1:
+            return httpx.Response(429, headers={"retry-after": "6"}, json={"error": {}})
+        delta = json.dumps({"choices": [{"delta": {"content": "Ok [S1]."}}]})
+        return httpx.Response(200, text=f"data: {delta}\n\ndata: [DONE]\n\n")
+
+    respx.post(URL).mock(side_effect=chat)
+    assert "".join(GroqLLM(api_key="k").stream_answer("When?", [])) == "Ok [S1]."
+    assert calls == ["openai/gpt-oss-120b", "openai/gpt-oss-120b"]

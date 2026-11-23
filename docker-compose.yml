@@ -4,9 +4,11 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     environment:
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       MINUTES_MODEL: ${MINUTES_MODEL:-claude-opus-5-5}
-      MINUTES_PROVIDER: ${MINUTES_PROVIDER:-claude}
+      MINUTES_PROVIDER: ${MINUTES_PROVIDER:-auto}
+      MINUTES_RETRIEVAL: ${MINUTES_RETRIEVAL:-hybrid+rerank}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       MINUTES_GEMINI_MODEL: ${MINUTES_GEMINI_MODEL:-gemini-3.5-flash}
     volumes:

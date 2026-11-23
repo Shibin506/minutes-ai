@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "minutes": {
+      "command": "python",
+      "args": ["-m", "minutes.mcp_server"],
+      "cwd": "/path/to/minutes-ai/backend",
+      "env": { "MINUTES_DB_PATH": "/path/to/minutes-ai/backend/data/minutes.db" }
+    }
+  }
+}

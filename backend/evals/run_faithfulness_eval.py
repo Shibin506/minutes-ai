@@ -12,6 +12,7 @@ Reported per run:
 
     python -m evals.run_faithfulness_eval --demo              # offline: rule-based answers + judge
     python -m evals.run_faithfulness_eval --limit 30   # Groq answers, a second Groq model judges
+    python -m evals.run_faithfulness_eval --limit 30 --answerer gemini   # Gemini answers
 """
 
 from __future__ import annotations
@@ -20,6 +21,7 @@ import argparse
 import json
 import os
 import re
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal
@@ -110,7 +112,8 @@ def run(answerer, judge, limit: int | None = None, k: int = 8) -> Totals:
     cases = [c for name in SETS for c in json.loads((HERE / SETS[name]).read_text())]
     cases = cases[:limit] if limit else cases
     t = Totals()
-    for case in cases:
+    for n, case in enumerate(cases, start=1):
+        print(f"  [{n}/{len(cases)}] {case['question'][:70]}", file=sys.stderr, flush=True)
         hits = retriever.search(case["question"], k=k)
         answer = "".join(answerer.stream_answer(case["question"], hits))
         t.questions += 1
@@ -150,6 +153,9 @@ def main() -> None:
         "--demo", action="store_true", help="offline: rule-based answerer and judge"
     )
     parser.add_argument("--limit", type=int, default=None)
+    parser.add_argument(
+        "--answerer", choices=["groq", "gemini"], default="groq", help="model that answers"
+    )
     parser.add_argument("--json", type=Path)
     args = parser.parse_args()
     if args.demo:
@@ -158,8 +164,19 @@ def main() -> None:
         from minutes.llm import GroqLLM
 
         key = os.environ["GROQ_API_KEY"]
-        answerer = GroqLLM(api_key=key)
-        judge = GroqLLM(model="qwen/qwen3.8-27b", api_key=key, reasoning_effort="")
+        patient = (20.0, 40.0, 60.0, 60.0)  # free tier: 8K tokens a minute per model
+        if args.answerer == "gemini":
+            from minutes.llm import GeminiLLM
+
+            answerer = GeminiLLM(
+                api_key=os.environ["GEMINI_API_KEY"], reasoning_effort="low", retry_delays=patient
+            )
+        else:
+            answerer = GroqLLM(api_key=key, retry_delays=patient)
+            answerer.quota_fallbacks = ()  # measure this model, don't switch mid-run
+        judge = GroqLLM(
+            model="qwen/qwen3.8-27b", api_key=key, reasoning_effort="", retry_delays=patient
+        )
         label = f"answers: {answerer.model}, judge: {judge.model}"
     t = run(answerer, judge, args.limit)
     result = {"setup": label, **t.as_dict(), "non_supported_examples": t.examples}

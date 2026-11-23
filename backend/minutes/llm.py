@@ -356,7 +356,11 @@ class OpenAICompatLLM:
             stream=True,
         )
         models = [self.model]
-        for attempt, model in enumerate(models):
+        waits = list(self.retry_delays[:2])  # short per-minute limits: wait, then retry
+        attempt = -1
+        while attempt + 1 < len(models):
+            attempt += 1
+            model = models[attempt]
             with self.http.stream(
                 "POST",
                 f"{self.base_url}/chat/completions",
@@ -367,6 +371,10 @@ class OpenAICompatLLM:
                     r.read()
                     if attempt == 0 and (more := self._quota_fallbacks(r)):
                         models += more  # out of daily quota: answer with another model
+                        continue
+                    if r.status_code in RETRY_STATUSES and waits:
+                        time.sleep(_wait(r, waits.pop(0)))
+                        attempt -= 1  # same model again
                         continue
                     if r.status_code == 429 and attempt < len(models) - 1:
                         continue
