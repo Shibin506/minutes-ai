@@ -83,12 +83,14 @@ class Totals:
     partial: int = 0
     unsupported: int = 0
     with_fact: int = 0
+    errors: int = 0  # questions skipped because the model call failed
     examples: list[dict] = field(default_factory=list)
 
     def as_dict(self) -> dict:
         c = max(self.cited, 1)
         return {
             "questions": self.questions,
+            "skipped_errors": self.errors,
             "claims": self.claims,
             "cited_claims": self.cited,
             "supported": self.supported / c,
@@ -115,7 +117,12 @@ def run(answerer, judge, limit: int | None = None, k: int = 8) -> Totals:
     for n, case in enumerate(cases, start=1):
         print(f"  [{n}/{len(cases)}] {case['question'][:70]}", file=sys.stderr, flush=True)
         hits = retriever.search(case["question"], k=k)
-        answer = "".join(answerer.stream_answer(case["question"], hits))
+        try:
+            answer = "".join(answerer.stream_answer(case["question"], hits))
+        except Exception as exc:  # noqa: BLE001 - a provider hiccup skips one question, not the run
+            print(f"    skipped: {str(exc)[:120]}", file=sys.stderr, flush=True)
+            t.errors += 1
+            continue
         t.questions += 1
         t.with_fact += case["evidence"].lower() in answer.lower()
         found = claims(answer)
@@ -137,7 +144,16 @@ def run(answerer, judge, limit: int | None = None, k: int = 8) -> Totals:
                 )
                 for i, c, ids_ in cited
             )
-            got = judge.complete_json(JUDGE_SYSTEM, prompt, Judgement).verdicts
+            try:
+                got = judge.complete_json(JUDGE_SYSTEM, prompt, Judgement).verdicts
+            except Exception as exc:  # noqa: BLE001
+                print(f"    judge failed: {str(exc)[:120]}", file=sys.stderr, flush=True)
+                t.errors += 1
+                t.claims -= len(found)
+                t.cited -= len(cited)
+                t.questions -= 1
+                t.with_fact -= case["evidence"].lower() in answer.lower()
+                continue
             verdicts = {v.claim: v.verdict for v in got}
         for i, c, _ in cited:
             v = verdicts.get(i, "unsupported")

@@ -101,8 +101,12 @@ export function LiveMeeting({ serverTranscription, onSaved }: Props) {
         // Track the loudest moment of each chunk, so silent chunks are skipped: it saves a
         // request, and Whisper tends to invent words ("Thank you.") for silence.
         const audio = new AudioContext();
+        await audio.resume().catch(() => {}); // created after an await, it may start suspended
         const analyser = audio.createAnalyser();
-        audio.createMediaStreamSource(stream).connect(analyser);
+        // Keep a reference: Chrome can collect an unreferenced source node, and the meter
+        // would then read silence.
+        const source = audio.createMediaStreamSource(stream);
+        source.connect(analyser);
         const buf = new Float32Array(analyser.fftSize);
         let level = { peak: 0 }; // the chunk being recorded
         const meter = setInterval(() => {
@@ -112,6 +116,7 @@ export function LiveMeeting({ serverTranscription, onSaved }: Props) {
         }, 100);
         cleanups.push(
           () => clearInterval(meter),
+          () => source.disconnect(),
           () => void audio.close(),
         );
         // One recorder per chunk, so every chunk is a complete, playable file.
@@ -126,7 +131,8 @@ export function LiveMeeting({ serverTranscription, onSaved }: Props) {
           const chunkLevel = (level = { peak: 0 });
           rec.ondataavailable = (e) => e.data.size && parts.push(e.data);
           rec.onstop = () => {
-            if (chunkLevel.peak < SILENCE_RMS) return;
+            // Only trust the meter if it was running; otherwise send everything.
+            if (audio.state === "running" && chunkLevel.peak < SILENCE_RMS) return;
             const blob = new Blob(parts, { type: mime });
             const prompt = segsRef.current
               .map((s) => s.text)
