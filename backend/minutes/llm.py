@@ -12,10 +12,11 @@ import re
 import time
 from collections import Counter
 from collections.abc import Iterator
-from typing import Protocol
+from typing import Protocol, TypeVar
 
 import anthropic
 import httpx
+from pydantic import BaseModel
 
 from . import prompts
 from .schemas import ActionItem, Decision, MeetingAnalysis, Topic
@@ -31,12 +32,21 @@ class AnalysisError(RuntimeError):
     pass
 
 
+T = TypeVar("T", bound=BaseModel)
+
+
 class LLM(Protocol):
     name: str
+    #: True for the rule-based stand-in; features then use their own heuristics.
+    demo: bool
 
     def analyze(self, title_hint: str, segments: list[Segment]) -> MeetingAnalysis: ...
 
     def stream_answer(self, question: str, hits: list[SearchHit]) -> Iterator[str]: ...
+
+    def complete(self, system: str, user: str, max_tokens: int = 2000) -> str: ...
+
+    def complete_json(self, system: str, user: str, schema: type[T]) -> T: ...
 
 
 def clamp_segments(analysis: MeetingAnalysis, n_segments: int) -> MeetingAnalysis:
@@ -95,15 +105,43 @@ class ClaudeLLM:
             if stream.get_final_message().stop_reason == "refusal":
                 yield "\n\n_The model declined to answer this question._"
 
+    demo = False
+
+    def complete(self, system: str, user: str, max_tokens: int = 2000) -> str:
+        response = self.client.messages.create(
+            model=self.model,
+            max_tokens=max_tokens,
+            system=system,
+            messages=[{"role": "user", "content": user}],
+        )
+        return "".join(b.text for b in response.content if b.type == "text")
+
+    def complete_json(self, system: str, user: str, schema: type[T]) -> T:
+        response = self.client.beta.messages.parse(
+            model=self.model,
+            max_tokens=8000,
+            betas=[FALLBACK_BETA],
+            fallbacks="default",
+            system=system,
+            messages=[{"role": "user", "content": user}],
+            output_format=schema,
+        )
+        if response.parsed_output is None:
+            raise AnalysisError("The model returned no structured output.")
+        return response.parsed_output
+
 
 # ---------------------------------------------------------------------------
-# Gemini
+# OpenAI-compatible providers: Gemini and Groq
 # ---------------------------------------------------------------------------
 
 GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai"
-# Gemini answers 503 "high demand" in short bursts; a few quick retries ride them out.
-GEMINI_RETRY_STATUSES = {500, 502, 503}
-GEMINI_RETRY_DELAYS = (2.0, 5.0, 10.0)
+GROQ_BASE_URL = "https://api.groq.com/openai/v1"
+# Providers answer 5xx "high demand" in short bursts; a few quick retries ride them out.
+RETRY_STATUSES = {429, 500, 502, 503}
+GEMINI_RETRY_STATUSES = RETRY_STATUSES
+RETRY_DELAYS = (2.0, 5.0, 10.0)
+GEMINI_RETRY_DELAYS = RETRY_DELAYS
 
 
 def _inline_refs(schema: dict) -> dict:
@@ -128,75 +166,143 @@ def _inline_refs(schema: dict) -> dict:
     return walk(schema)
 
 
-class GeminiLLM:
-    """Gemini through its OpenAI-compatible endpoint: a strict JSON schema for the
-    analysis and server-sent events for streamed answers."""
+def _strict(schema: dict) -> dict:
+    """Strict JSON-schema mode (Groq, OpenAI) wants every object closed and fully required."""
+    if isinstance(schema, dict):
+        out = {k: _strict(v) for k, v in schema.items()}
+        if out.get("type") == "object" and "properties" in out:
+            out["additionalProperties"] = False
+            out["required"] = list(out["properties"])
+        return out
+    if isinstance(schema, list):
+        return [_strict(v) for v in schema]
+    return schema
+
+
+def json_schema_for(model: type[BaseModel], strict: bool) -> dict:
+    schema = _inline_refs(model.model_json_schema())
+    return _strict(schema) if strict else schema
+
+
+class OpenAICompatLLM:
+    """A chat-completions API: strict JSON schema for structured output, server-sent events for
+    streamed answers, retries on overload, and an optional fallback to a current model."""
+
+    demo = False
+    base_url_default = GEMINI_BASE_URL
+    strict_schema = False
 
     def __init__(
         self,
-        model: str = "gemini-3.5-flash",
+        model: str,
         api_key: str = "",
         reasoning_effort: str = "",
-        base_url: str = GEMINI_BASE_URL,
+        base_url: str | None = None,
         http: httpx.Client | None = None,
-        retry_delays: tuple[float, ...] = GEMINI_RETRY_DELAYS,
+        retry_delays: tuple[float, ...] = RETRY_DELAYS,
     ):
         self.name = model
         self.model = model
         self.api_key = api_key
         self.reasoning_effort = reasoning_effort
-        self.base_url = base_url.rstrip("/")
+        self.base_url = (base_url or self.base_url_default).rstrip("/")
         self.http = http or httpx.Client(timeout=180)
         self.retry_delays = retry_delays
-        self.schema = _inline_refs(MeetingAnalysis.model_json_schema())
+        self.schema = json_schema_for(MeetingAnalysis, self.strict_schema)
 
-    def _body(self, system: str, user: str, **extra) -> dict:
+    # -- plumbing -----------------------------------------------------------
+
+    def _body(self, system: str, user: str, effort: str | None = None, **extra) -> dict:
         body = {
             "model": self.model,
             "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
             **extra,
         }
-        if self.reasoning_effort:
-            body["reasoning_effort"] = self.reasoning_effort
+        effort = effort if effort is not None else self.reasoning_effort
+        if effort:
+            body["reasoning_effort"] = effort
         return body
 
     def _headers(self) -> dict:
         return {"Authorization": f"Bearer {self.api_key or 'unset'}"}
 
-    def analyze(self, title_hint: str, segments: list[Segment]) -> MeetingAnalysis:
-        body = self._body(
-            prompts.ANALYSIS_SYSTEM,
-            prompts.analysis_request(title_hint, segments),
-            response_format={
-                "type": "json_schema",
-                "json_schema": {"name": "meeting_analysis", "strict": True, "schema": self.schema},
-            },
-        )
+    def _post(self, body: dict) -> httpx.Response:
         url = f"{self.base_url}/chat/completions"
         r = self.http.post(url, headers=self._headers(), json=body)
         for delay in self.retry_delays:
-            if r.status_code not in GEMINI_RETRY_STATUSES:
+            if r.status_code not in RETRY_STATUSES:
                 break
             time.sleep(delay)
             r = self.http.post(url, headers=self._headers(), json=body)
+        if r.status_code in (400, 404) and self._fallback_model(r):
+            body = {**body, "model": self.model}
+            r = self.http.post(url, headers=self._headers(), json=body)
+        return r
+
+    def _fallback_model(self, r: httpx.Response) -> bool:
+        """Override to switch to a current model when the configured one is retired."""
+        return False
+
+    def _content(self, r: httpx.Response, what: str) -> str:
         if r.status_code >= 400:
-            raise AnalysisError(f"Gemini returned HTTP {r.status_code}: {r.text[:300]}")
+            raise AnalysisError(f"{self.provider} returned HTTP {r.status_code}: {r.text[:300]}")
         choice = r.json()["choices"][0]
         if choice.get("finish_reason") not in ("stop", None):
-            raise AnalysisError(f"The analysis stopped early ({choice.get('finish_reason')}).")
-        analysis = MeetingAnalysis.model_validate_json(choice["message"]["content"])
+            raise AnalysisError(f"The {what} stopped early ({choice.get('finish_reason')}).")
+        return choice["message"].get("content") or ""
+
+    @property
+    def provider(self) -> str:
+        return type(self).__name__.removesuffix("LLM")
+
+    def _json(self, system: str, user: str, model: type[T], schema: dict, name: str) -> T:
+        body = self._body(
+            system,
+            user,
+            response_format={
+                "type": "json_schema",
+                "json_schema": {"name": name, "strict": True, "schema": schema},
+            },
+        )
+        return model.model_validate_json(self._content(self._post(body), name.replace("_", " ")))
+
+    # -- the LLM protocol ---------------------------------------------------
+
+    def analyze(self, title_hint: str, segments: list[Segment]) -> MeetingAnalysis:
+        analysis = self._json(
+            prompts.ANALYSIS_SYSTEM,
+            prompts.analysis_request(title_hint, segments),
+            MeetingAnalysis,
+            self.schema,
+            "meeting_analysis",
+        )
         return clamp_segments(analysis, len(segments))
+
+    def complete(self, system: str, user: str, max_tokens: int = 2000) -> str:
+        body = self._body(system, user, effort=self.light_effort, max_tokens=max_tokens)
+        return self._content(self._post(body), "reply").strip()
+
+    def complete_json(self, system: str, user: str, schema: type[T]) -> T:
+        return self._json(
+            system, user, schema, json_schema_for(schema, self.strict_schema), schema.__name__
+        )
+
+    #: Reasoning effort for short replies (answers, reranking, judging); None = provider default.
+    light_effort: str | None = None
 
     def stream_answer(self, question: str, hits: list[SearchHit]) -> Iterator[str]:
         body = self._body(
-            prompts.ANSWER_SYSTEM, prompts.answer_request(question, hits), stream=True
+            prompts.ANSWER_SYSTEM,
+            prompts.answer_request(question, hits),
+            effort=self.light_effort,
+            stream=True,
         )
         with self.http.stream(
             "POST", f"{self.base_url}/chat/completions", headers=self._headers(), json=body
         ) as r:
             if r.status_code >= 400:
                 r.read()
-                raise RuntimeError(f"Gemini returned HTTP {r.status_code}: {r.text[:300]}")
+                raise RuntimeError(f"{self.provider} returned HTTP {r.status_code}: {r.text[:300]}")
             for line in r.iter_lines():
                 if not line.startswith("data: ") or line == "data: [DONE]":
                     continue
@@ -204,6 +310,56 @@ class GeminiLLM:
                     text = (choice.get("delta") or {}).get("content")
                     if text:
                         yield text
+
+
+class GeminiLLM(OpenAICompatLLM):
+    """Gemini through its OpenAI-compatible endpoint (it has a free tier)."""
+
+    base_url_default = GEMINI_BASE_URL
+
+    def __init__(self, model: str = "gemini-3.5-flash", api_key: str = "", **kw):
+        super().__init__(model, api_key, **kw)
+
+
+GROQ_PREFERRED = (r"gpt-oss-120b", r"qwen3", r"gpt-oss-20b", r"llama")
+
+
+class GroqLLM(OpenAICompatLLM):
+    """Groq: open-weight models served very fast. Strict JSON schema for the analysis; if the
+    configured model has been retired, it switches to a current one from Groq's model list."""
+
+    base_url_default = GROQ_BASE_URL
+    strict_schema = True
+    light_effort = "low"
+
+    def __init__(
+        self,
+        model: str = "openai/gpt-oss-120b",
+        api_key: str = "",
+        reasoning_effort: str = "medium",
+        **kw,
+    ):
+        super().__init__(model, api_key, reasoning_effort, **kw)
+
+    def _fallback_model(self, r: httpx.Response) -> bool:
+        text = r.text.lower()
+        if not any(k in text for k in ("model", "decommission", "not found", "does not exist")):
+            return False
+        try:
+            listing = self.http.get(f"{self.base_url}/models", headers=self._headers())
+            ids = [m["id"] for m in listing.json().get("data", [])]
+        except Exception:  # noqa: BLE001 - keep the original error
+            return False
+        for pattern in GROQ_PREFERRED:
+            for model_id in ids:
+                if (
+                    re.search(pattern, model_id)
+                    and model_id != self.model
+                    and "guard" not in model_id
+                ):
+                    self.model = self.name = model_id
+                    return True
+        return False
 
 
 # ---------------------------------------------------------------------------
@@ -243,6 +399,13 @@ class DemoLLM:
     """Keyword heuristics. Good enough to demo the UI; not a substitute for the model."""
 
     name = "demo (no API key)"
+    demo = True
+
+    def complete(self, system: str, user: str, max_tokens: int = 2000) -> str:
+        raise NotImplementedError("demo mode has no language model")
+
+    def complete_json(self, system: str, user: str, schema: type[T]) -> T:
+        raise NotImplementedError("demo mode has no language model")
 
     def analyze(self, title_hint: str, segments: list[Segment]) -> MeetingAnalysis:
         speakers = list(dict.fromkeys(s.speaker for s in segments))
@@ -309,6 +472,10 @@ def build_llm(settings) -> LLM:
         return DemoLLM()
     if settings.provider == "gemini":
         return GeminiLLM(
-            settings.gemini_model, settings.gemini_api_key, settings.gemini_reasoning_effort
+            settings.gemini_model,
+            settings.gemini_api_key,
+            reasoning_effort=settings.gemini_reasoning_effort,
         )
+    if settings.provider == "groq":
+        return GroqLLM(settings.groq_model, settings.groq_api_key)
     return ClaudeLLM(settings.model)

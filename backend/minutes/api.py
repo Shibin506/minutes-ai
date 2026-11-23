@@ -76,7 +76,7 @@ def create_app(settings: Settings | None = None, llm: LLM | None = None) -> Fast
                 with tempfile.NamedTemporaryFile(suffix=Path(filename).suffix) as tmp:
                     tmp.write(data)
                     tmp.flush()
-                    segments = transcribe(Path(tmp.name))
+                    segments = transcribe(Path(tmp.name), groq_api_key=settings.groq_api_key)
                 meeting_id = service.ingest_segments(segments, filename, title)
             else:
                 text = data.decode("utf-8", errors="replace")

@@ -15,18 +15,34 @@ class Settings:
     chunk_words: int
     retrieval_k: int
     cors_origins: list[str]
-    provider: str = "claude"  # "claude" or "gemini"
+    provider: str = "claude"  # "claude", "gemini" or "groq"
     gemini_model: str = "gemini-3.5-flash"
     gemini_api_key: str = ""
     gemini_reasoning_effort: str = ""  # "low" | "medium" | "high"; empty = model default
+    groq_model: str = "openai/gpt-oss-120b"
+    groq_api_key: str = ""
+    #: Analyze uploads inside the request (serverless hosts can't run background tasks).
+    sync_analysis: bool = False
+    #: Retrieval: "bm25", "hybrid" (BM25 + vectors, fused) or "hybrid+rerank" (then LLM reranking).
+    retrieval: str = "hybrid"
 
     @classmethod
     def from_env(cls) -> Settings:
-        provider = os.getenv("MINUTES_PROVIDER", "claude").lower()
-        if provider == "gemini":
-            has_key = bool(os.getenv("GEMINI_API_KEY"))
-        else:
-            has_key = bool(os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_AUTH_TOKEN"))
+        groq_key = os.getenv("GROQ_API_KEY") or os.getenv("Groq")  # noqa: SIM112 - the name some people give it in Vercel or ""
+        anthropic_key = os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_AUTH_TOKEN")
+        provider = os.getenv("MINUTES_PROVIDER", "auto").lower()
+        if provider == "auto":  # use whichever key is set: Claude, then Groq, then Gemini
+            if anthropic_key:
+                provider = "claude"
+            elif groq_key:
+                provider = "groq"
+            elif os.getenv("GEMINI_API_KEY"):
+                provider = "gemini"
+            else:
+                provider = "claude"
+        has_key = bool(
+            {"gemini": os.getenv("GEMINI_API_KEY"), "groq": groq_key}.get(provider, anthropic_key)
+        )
         demo_env = os.getenv("MINUTES_DEMO_MODE", "auto").lower()
         demo_mode = (not has_key) if demo_env == "auto" else demo_env in {"1", "true", "yes"}
         return cls(
@@ -40,4 +56,8 @@ class Settings:
             gemini_model=os.getenv("MINUTES_GEMINI_MODEL", "gemini-3.5-flash"),
             gemini_api_key=os.getenv("GEMINI_API_KEY", ""),
             gemini_reasoning_effort=os.getenv("MINUTES_GEMINI_REASONING_EFFORT", ""),
+            groq_model=os.getenv("MINUTES_GROQ_MODEL", "openai/gpt-oss-120b"),
+            groq_api_key=groq_key,
+            sync_analysis=os.getenv("MINUTES_SYNC_ANALYSIS", "").lower() in {"1", "true", "yes"},
+            retrieval=os.getenv("MINUTES_RETRIEVAL", "hybrid").lower(),
         )
